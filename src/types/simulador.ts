@@ -21,4 +21,5 @@ export interface DetalhesMesProcessado extends DetalhesMes {
   jurosMesPago: number;  // Juros pagos naquele mês específico
   lucroLiquido: number;
   valorizacaoPrevista: number;
+  parcelaMensal?: number; // Adicionado para compatibilidade com o novo campo em DetalhesMes
 }

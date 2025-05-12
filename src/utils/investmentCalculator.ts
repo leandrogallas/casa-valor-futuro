@@ -16,7 +16,7 @@ export interface ResultadoSimulacao {
   lucro: number;
   retornoPercentual: number;
   taxaCorrecao: number;
-  valorCompra?: number; // Making this optional to maintain backward compatibility
+  valorCompra: number;
   detalhes: DetalhesMes[];
 }
 
@@ -27,6 +27,7 @@ export interface DetalhesMes {
   saldoDevedor: number;
   parcelasPagas: number;
   reforcosPagos: number;
+  parcelaMensal: number; // Adicionado o valor da parcela mensal atualizada
 }
 
 export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoSimulacao {
@@ -44,33 +45,18 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
   // Cálculo do valor total dos reforços previstos
   const valorReforcoAnual = numAnos > 0 ? reforcos / numAnos : 0;
   
-  // Cálculo do valor da parcela mensal
-  // Precisamos calcular a parcela mensal de forma que, somada aos reforços anuais,
-  // o saldo devedor seja exatamente zero ao fim do período.
-  
-  // Primeiro, calculamos o valor presente dos reforços anuais
-  let valorPresenteReforcos = 0;
-  for (let ano = 1; ano <= numAnos; ano++) {
-    // Calcula a data do reforço em meses (final de cada ano)
-    const mesReforco = ano * 12;
-    // Aplica o fator de valor presente
-    valorPresenteReforcos += valorReforcoAnual / Math.pow(1 + taxaMensal, mesReforco);
-  }
-  
-  // O valor efetivo a ser financiado é o saldo devedor inicial menos o valor presente dos reforços
-  const valorEfetivoFinanciado = saldoDevedorInicial - valorPresenteReforcos;
-  
-  // Calcula a parcela mensal para amortizar o valor efetivo financiado no período
-  let parcelaMensal = 0;
+  // Cálculo do valor da parcela mensal inicial (sem correção)
+  // Usaremos o Sistema Price para calcular a parcela inicial
+  let parcelaMensalInicial = 0;
   
   if (Math.abs(taxaMensal) < 0.000001) {
     // Se a taxa for praticamente zero, dividimos o valor efetivo igualmente
-    parcelaMensal = valorEfetivoFinanciado / meses;
+    parcelaMensalInicial = saldoDevedorInicial / meses;
   } else {
     // Fórmula do Sistema Price: PMT = PV * [ r * (1+r)^n ] / [ (1+r)^n - 1 ]
-    parcelaMensal = valorEfetivoFinanciado * 
-      (taxaMensal * Math.pow(1 + taxaMensal, meses)) / 
-      (Math.pow(1 + taxaMensal, meses) - 1);
+    // Usamos taxa zero para calcular a parcela inicial sem juros
+    const taxaZero = 0;
+    parcelaMensalInicial = saldoDevedorInicial / meses;
   }
   
   // Variáveis para acompanhamento
@@ -83,20 +69,34 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
   // Valor inicial do imóvel
   const valorInicialImovel = valorMercado;
   
+  // A parcela mensal será corrigida anualmente
+  let parcelaMensalAtual = parcelaMensalInicial;
+  
   // Processamento mês a mês
   for (let i = 1; i <= meses; i++) {
+    // Correção anual da parcela (a cada 12 meses)
+    // No primeiro mês de cada ano (exceto o primeiro ano), aplicamos a correção
+    if (i > 1 && (i - 1) % 12 === 0) {
+      // Aplicar a correção anual à parcela
+      parcelaMensalAtual = parcelaMensalAtual * (1 + correcao);
+    }
+    
     // Calcular juros do mês sobre o saldo devedor atual
     const jurosMes = saldoDevedor * taxaMensal;
     
     // Determinar o valor de amortização: parcela menos juros
-    const amortizacao = parcelaMensal - jurosMes;
+    const amortizacao = parcelaMensalAtual - jurosMes;
+    
+    // Verificar se a amortização é negativa (juros maiores que a parcela)
+    // Em caso positivo, a diferença é incorporada ao saldo devedor
+    const amortizacaoEfetiva = Math.max(0, amortizacao);
     
     // Atualizar o saldo devedor
-    saldoDevedor = saldoDevedor - amortizacao;
+    saldoDevedor = saldoDevedor - amortizacaoEfetiva;
     
     // Adicionar a parcela mensal ao total investido
-    valorInvestido += parcelaMensal;
-    parcelasPagas += parcelaMensal;
+    valorInvestido += parcelaMensalAtual;
+    parcelasPagas += parcelaMensalAtual;
     
     // Aplicar reforço anual ao final de cada ano
     if (i % 12 === 0 && i / 12 <= numAnos) {
@@ -117,7 +117,8 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
       valorImovel: parseFloat(valorAtualImovel.toFixed(2)),
       saldoDevedor: parseFloat(Math.max(0, saldoDevedor).toFixed(2)),
       parcelasPagas: parseFloat(parcelasPagas.toFixed(2)),
-      reforcosPagos: parseFloat(reforcosPagos.toFixed(2))
+      reforcosPagos: parseFloat(reforcosPagos.toFixed(2)),
+      parcelaMensal: parseFloat(parcelaMensalAtual.toFixed(2))
     });
     
     // Ajuste no último mês para garantir saldo devedor zero
@@ -153,7 +154,8 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
     valorImovel: parseFloat(valorImovelFinal.toFixed(2)),
     lucro: parseFloat(lucro.toFixed(2)),
     retornoPercentual: parseFloat(retornoPercentual.toFixed(2)),
-    taxaCorrecao: correcao, // Adicionando a taxa de correção aqui
+    taxaCorrecao: correcao,
+    valorCompra: valorCompra,
     detalhes
   };
 }

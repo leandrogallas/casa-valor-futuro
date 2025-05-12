@@ -29,9 +29,10 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
     const ganhoReal = mes.valorImovel - resultado.detalhes[0].valorImovel;
     
     // Juros pagos são a parte da parcela que não amortiza a dívida
-    // Se não tivermos o detalhe dos juros, usamos uma estimativa baseada na taxa de correção
-    const jurosMesPago = index > 0 ? 
-      (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) : 0;
+    // Calculamos o juro com base na taxa sobre o saldo devedor anterior
+    const jurosMesPago = index > 0 
+      ? (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) 
+      : 0;
     
     // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
     // Use the previously calculated item in detalhesProcessed array
