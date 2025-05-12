@@ -33,3 +33,12 @@ export interface DetalhesMesProcessado extends DetalhesMes {
   valorizacaoPrevista: number;
   temReforco: boolean; // Indica se neste mês houve pagamento de reforço
 }
+
+// Configurações para personalização do PDF
+export interface PDFOptions {
+  incluirGraficoGlobal: boolean;
+  incluirGraficoMensal: boolean;
+  incluirGraficoComparativo: boolean;
+  incluirTabela: boolean;
+  temaFundo?: 'light' | 'dark';
+}

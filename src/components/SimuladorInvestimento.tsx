@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FormularioParametros from "./simulador/FormularioParametros";
@@ -6,7 +7,7 @@ import TelaInicial from "./simulador/TelaInicial";
 import ResultadoInvestimento from "./ResultadoInvestimento";
 import { calcularSimulacaoInvestimento, ResultadoSimulacao } from "@/utils/investmentCalculator";
 import { toast } from "@/components/ui/use-toast";
-import { DadosSimulacao, DadosEmpreendimento } from "@/types/simulador";
+import { DadosSimulacao, DadosEmpreendimento, DetalhesMesProcessado } from "@/types/simulador";
 import { RelatorioPreview } from "./simulador/RelatorioImports";
 import { generatePDF, sendPDFByEmail } from "@/services/pdfService";
 
@@ -33,6 +34,8 @@ const SimuladorInvestimento: React.FC = () => {
   });
 
   const [resultado, setResultado] = useState<ResultadoSimulacao | null>(null);
+  // Estado para armazenar os dados processados para os gráficos
+  const [detalhesProcessados, setDetalhesProcessados] = useState<DetalhesMesProcessado[]>([]);
 
   const calcularSimulacao = () => {
     try {
@@ -49,6 +52,9 @@ const SimuladorInvestimento: React.FC = () => {
       const resultadoCalculado = calcularSimulacaoInvestimento(dados);
       setResultado(resultadoCalculado);
       
+      // Processar detalhes para os gráficos e PDF
+      processarDetalhesMensais(resultadoCalculado);
+      
       toast({
         title: "Simulação concluída!",
         description: "Os resultados foram calculados com sucesso."
@@ -61,6 +67,73 @@ const SimuladorInvestimento: React.FC = () => {
         variant: "destructive"
       });
     }
+  };
+
+  // Função para processar os detalhes mensais
+  const processarDetalhesMensais = (resultado: ResultadoSimulacao) => {
+    const { detalhes } = resultado;
+    
+    if (!detalhes || detalhes.length === 0) {
+      setDetalhesProcessados([]);
+      return;
+    }
+
+    const processados: DetalhesMesProcessado[] = [];
+    
+    detalhes.forEach((mes, index) => {
+      const mesAnterior = index > 0 ? detalhes[index - 1] : null;
+      
+      // Monthly capital gain (valorização do mês)
+      const ganhoCapitalMensal = mesAnterior 
+        ? mes.valorImovel - mesAnterior.valorImovel 
+        : mes.valorImovel - detalhes[0].valorImovel;
+      
+      // Ganho real é apenas a valorização do imóvel
+      const ganhoReal = mes.valorImovel - detalhes[0].valorImovel;
+      
+      // Juros pagos são a parte da parcela que não amortiza a dívida
+      // Calculamos o juro com base na taxa sobre o saldo devedor anterior
+      const jurosMesPago = index > 0 
+        ? (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) 
+        : 0;
+      
+      // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
+      const jurosPagos = index > 0 
+        ? processados[index - 1].jurosPagos + jurosMesPago 
+        : jurosMesPago;
+      
+      // Juros relacionados aos reforços para este mês específico
+      const jurosReforcoMesPago = mes.temReforco && index > 0
+        ? (resultado.totalJurosReforcos / Math.floor(detalhes.length / 12)) * (Math.floor(index / 12) + 1) / Math.floor(detalhes.length / 12)
+        : 0;
+      
+      // Juros acumulados relacionados aos reforços
+      const jurosReforcosPagos = index > 0
+        ? processados[index - 1].jurosReforcosPagos + (mes.temReforco ? jurosReforcoMesPago : 0)
+        : jurosReforcoMesPago;
+      
+      // Lucro líquido é a diferença entre o ganho real (valorização) e os juros pagos (parcelas + reforços)
+      const lucroLiquido = ganhoReal - jurosPagos - jurosReforcosPagos;
+      
+      // Valorização prevista (acumulada desde o início)
+      const valorizacaoPrevista = mes.valorImovel - detalhes[0].valorImovel;
+      
+      processados.push({
+        ...mes,
+        ganhoCapitalMensal,
+        ganhoCapitalAcumulado: ganhoReal, // Mesmo que ganhoReal
+        ganhoReal,
+        jurosPagos,
+        jurosMesPago,
+        jurosReforcosPagos,
+        jurosReforcoMesPago,
+        lucroLiquido,
+        valorizacaoPrevista,
+        temReforco: mes.temReforco
+      });
+    });
+    
+    setDetalhesProcessados(processados);
   };
 
   const handleEmpreendimentoChange = (campo: keyof DadosEmpreendimento, valor: any) => {
@@ -165,8 +238,13 @@ const SimuladorInvestimento: React.FC = () => {
     });
     
     try {
-      // Gerar o PDF usando o serviço
-      const pdfBlob = await generatePDF(resultado, dados, dadosEmpreendimento);
+      // Gerar o PDF usando o serviço e passando os dados processados
+      const pdfBlob = await generatePDF(
+        resultado, 
+        dados, 
+        dadosEmpreendimento,
+        detalhesProcessados.length > 0 ? detalhesProcessados : undefined
+      );
       
       // Criar URL para o blob
       const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -206,7 +284,12 @@ const SimuladorInvestimento: React.FC = () => {
     
     try {
       // Gerar o PDF usando o serviço
-      const pdfBlob = await generatePDF(resultado, dados, dadosEmpreendimento);
+      const pdfBlob = await generatePDF(
+        resultado, 
+        dados, 
+        dadosEmpreendimento,
+        detalhesProcessados.length > 0 ? detalhesProcessados : undefined
+      );
       
       // Enviar o PDF por email
       const subject = `Simulação de Investimento - ${dadosEmpreendimento.nomeEmpreendimento || 'Novo Empreendimento'}`;
