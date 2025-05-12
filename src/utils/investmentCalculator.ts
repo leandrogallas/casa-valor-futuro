@@ -15,7 +15,8 @@ export interface ResultadoSimulacao {
   valorImovel: number;
   lucro: number;
   retornoPercentual: number;
-  taxaCorrecao: number; // Nova propriedade para ser usada no cálculo dos juros
+  taxaCorrecao: number;
+  valorCompra?: number; // Making this optional to maintain backward compatibility
   detalhes: DetalhesMes[];
 }
 

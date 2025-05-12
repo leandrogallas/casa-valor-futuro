@@ -53,8 +53,13 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Calculate the sum of all interest paid
   const totalJurosPagos = detalhesProcessed.reduce((total, mes) => total + mes.jurosPagos, 0);
   
+  // Get the valor compra, using the initial value of the property or the first month's value as fallback
+  const valorCompra = 'valorCompra' in resultado 
+    ? resultado.valorCompra 
+    : resultado.detalhes[0].valorImovel;
+  
   // Calculate the sum of property purchase price and total interest paid
-  const valorImovelMaisJuros = resultado.valorCompra + totalJurosPagos;
+  const valorImovelMaisJuros = valorCompra + totalJurosPagos;
   
   // Get data for specific years to display in the table (yearly increments)
   const yearlyData = detalhesProcessed.filter(item => item.mes % 12 === 0 || item.mes === 1 || item.mes === detalhesProcessed.length);
@@ -72,7 +77,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         meses={detalhes.length}
         totalJurosPagos={totalJurosPagos}
         valorImovelMaisJuros={valorImovelMaisJuros}
-        valorCompra={resultado.valorCompra}
+        valorCompra={valorCompra}
       />
       
       <GraficoResultado 
