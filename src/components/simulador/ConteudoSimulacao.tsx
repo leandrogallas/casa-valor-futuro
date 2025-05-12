@@ -1,10 +1,10 @@
 
 import React from "react";
-import FormularioParametros from "./FormularioParametros";
-import TelaInicial from "./TelaInicial";
-import ResultadoInvestimento from "../ResultadoInvestimento";
 import { DadosSimulacao } from "@/types/simulador";
 import { ResultadoSimulacao } from "@/utils/investment/types";
+import FormPanel from "./panels/FormPanel";
+import ResultsPanel from "./panels/ResultsPanel";
+import SimulacaoLayout from "./layout/SimulacaoLayout";
 
 interface ConteudoSimulacaoProps {
   resultado: ResultadoSimulacao | null;
@@ -20,23 +20,18 @@ const ConteudoSimulacao: React.FC<ConteudoSimulacaoProps> = ({
   onCalcular
 }) => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-1">
-        <FormularioParametros 
+    <SimulacaoLayout
+      formPanel={
+        <FormPanel 
           dados={dados} 
           onDadosChange={onDadosChange} 
           onCalcular={onCalcular} 
         />
-      </div>
-      
-      <div className="lg:col-span-2">
-        {resultado ? (
-          <ResultadoInvestimento resultado={resultado} />
-        ) : (
-          <TelaInicial />
-        )}
-      </div>
-    </div>
+      }
+      resultsPanel={
+        <ResultsPanel resultado={resultado} />
+      }
+    />
   );
 };
 
