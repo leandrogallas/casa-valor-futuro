@@ -7,8 +7,9 @@ const Index = () => {
       <div className="container mx-auto py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-investment-dark mb-2">Simulador de Investimento Imobiliário</h1>
-          <p className="text-lg text-muted-foreground">
-            Analise retornos, valorização e ganhos de capital para seu investimento imobiliário ao longo do tempo
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Compare o investimento em imóveis considerando entrada, parcelas, reforços, valorização e juros.
+            Analise o saldo devedor, ganho de capital e retorno do seu investimento ao longo do tempo.
           </p>
         </div>
         <SimuladorInvestimento />
