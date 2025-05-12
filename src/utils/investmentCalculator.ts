@@ -1,4 +1,3 @@
-
 interface InvestmentData {
   valorMercado: number;
   valorCompra: number;
@@ -28,23 +27,49 @@ export interface DetalhesMes {
 }
 
 export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoSimulacao {
-  const { valorMercado, valorizacao, correcao, entrada, parcelas, reforcos, meses } = dados;
+  const { valorMercado, valorCompra, valorizacao, correcao, entrada, parcelas, reforcos, meses } = dados;
 
   // Calcular a taxa mensal de correção a partir da taxa anual
   const taxaMensal = Math.pow(1 + correcao, 1 / 12) - 1;
   
   // Número de reforços anuais esperados
   const numReforcos = Math.floor(meses / 12);
-  const valorReforcoMensal = meses >= 12 ? reforcos / numReforcos : 0;
   
-  // Valor inicial do saldo devedor (preço de compra menos entrada)
-  let saldoDevedorInicial = parcelas;
+  // Definir o valor inicial do saldo devedor
+  const saldoDevedorInicial = valorCompra - entrada;
   
-  // Cálculo da parcela usando o Sistema Price (prestações fixas)
-  // Fórmula: PMT = PV * [ r * (1+r)^n ] / [ (1+r)^n - 1 ]
-  const parcelaMensal = saldoDevedorInicial * 
-    (taxaMensal * Math.pow(1 + taxaMensal, meses)) / 
-    (Math.pow(1 + taxaMensal, meses) - 1);
+  // Calcular o valor total dos reforços previstos
+  const totalReforcos = reforcos;
+  
+  // Calcular o valor das parcelas mensais fixas baseado no saldo devedor inicial,
+  // considerando que os reforços anuais serão aplicados separadamente
+  
+  // Como os reforços serão divididos anualmente, precisamos ajustar o valor da parcela mensal
+  // para que ao final do período o saldo devedor seja zero
+  
+  // Precisamos calcular o valor presente dos reforços anuais
+  let valorPresenteReforcos = 0;
+  for (let ano = 1; ano <= numReforcos; ano++) {
+    const valorReforcoAnual = numReforcos > 0 ? totalReforcos / numReforcos : 0;
+    // Aplica desconto para trazer a valor presente
+    valorPresenteReforcos += valorReforcoAnual / Math.pow(1 + taxaMensal, ano * 12);
+  }
+  
+  // Ajusta o saldo devedor subtraindo o valor presente dos reforços
+  const saldoAjustado = saldoDevedorInicial - valorPresenteReforcos;
+  
+  // Calcula a parcela mensal para o saldo ajustado usando o Sistema Price
+  let parcelaMensal = 0;
+  
+  if (Math.abs(taxaMensal) < 0.000001) {
+    // Se a taxa for praticamente zero, dividimos o saldo igualmente
+    parcelaMensal = saldoDevedorInicial / meses;
+  } else {
+    // Fórmula do Sistema Price: PMT = PV * [ r * (1+r)^n ] / [ (1+r)^n - 1 ]
+    parcelaMensal = saldoAjustado * 
+      (taxaMensal * Math.pow(1 + taxaMensal, meses)) / 
+      (Math.pow(1 + taxaMensal, meses) - 1);
+  }
 
   // Arrays para armazenar o histórico completo
   let valorInvestido = entrada;
@@ -58,29 +83,28 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
   
   // Processamento mês a mês
   for (let i = 1; i <= meses; i++) {
-    // Aplicação da correção sobre o saldo devedor atual
+    // Aplicação da correção sobre o saldo devedor atual (juros)
     const jurosMes = saldoDevedor * taxaMensal;
     
-    // Valor da amortização = parcela mensal - juros do mês
+    // Valor da amortização na parcela mensal (parcela - juros)
     const amortizacao = parcelaMensal - jurosMes;
     
     // Atualiza o saldo devedor reduzindo a amortização
-    saldoDevedor -= amortizacao;
+    saldoDevedor = saldoDevedor - amortizacao;
     
     // Adiciona a parcela mensal ao total investido
     valorInvestido += parcelaMensal;
     parcelasPagas += parcelaMensal;
     
-    // Aplicação do reforço anual (ao final de cada ano)
-    if (i % 12 === 0 && i > 0 && i/12 <= numReforcos) {
+    // Aplicação do reforço anual (ao fim de cada ano)
+    if (i % 12 === 0 && i/12 <= numReforcos) {
+      const valorReforcoAnual = numReforcos > 0 ? totalReforcos / numReforcos : 0;
+      
       // Aplica o reforço diretamente no saldo devedor
-      saldoDevedor = Math.max(0, saldoDevedor - valorReforcoMensal);
-      valorInvestido += valorReforcoMensal;
-      reforcosPagos += valorReforcoMensal;
+      saldoDevedor = saldoDevedor - valorReforcoAnual;
+      valorInvestido += valorReforcoAnual;
+      reforcosPagos += valorReforcoAnual;
     }
-
-    // Garante que o saldo não seja negativo
-    saldoDevedor = Math.max(0, saldoDevedor);
     
     // Cálculo da valorização do imóvel (juros compostos mensais baseados na taxa anual)
     const taxaValorizacaoMensal = Math.pow(1 + valorizacao, 1/12) - 1;
@@ -96,8 +120,8 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
       reforcosPagos: parseFloat(reforcosPagos.toFixed(2))
     });
     
-    // Se é o último mês, garante que o saldo devedor seja zero
-    if (i === meses && saldoDevedor > 0.01) {
+    // Ajuste no último mês para garantir saldo zero
+    if (i === meses && Math.abs(saldoDevedor) > 0.01) {
       // Ajusta o último registro para garantir saldo zero
       const ultimoRegistro = detalhes[detalhes.length - 1];
       const ajuste = ultimoRegistro.saldoDevedor;
