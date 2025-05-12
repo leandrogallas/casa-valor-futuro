@@ -44,4 +44,5 @@ export interface ResultadoSimulacao {
   cubInicial?: number;
   cubFinal?: number;
   indiceCubFinal?: number;
+  parcelas: number; // Total parcelas value from input data (uncorrected)
 }
