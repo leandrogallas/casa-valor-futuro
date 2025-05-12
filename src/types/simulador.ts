@@ -9,3 +9,11 @@ export interface DadosSimulacao {
   reforcos: number;
   meses: number;
 }
+
+export interface DetalhesMesProcessado extends DetalhesMes {
+  ganhoCapitalMensal: number;
+  ganhoCapitalAcumulado: number;
+  ganhoReal: number;
+  lucroLiquido: number;
+  valorizacaoPrevista: number;
+}
