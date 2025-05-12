@@ -1,3 +1,4 @@
+
 import React from "react";
 import { ResultadoSimulacao, DetalhesMes, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 import CardsResumo from "./resultado/CardsResumo";
@@ -27,8 +28,13 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
     
     // Juros pagos são a parte da parcela que não amortiza a dívida
     // Se não tivermos o detalhe dos juros, usamos uma estimativa baseada na taxa de correção
-    const jurosPagos = index > 0 ? 
+    const jurosMesPago = index > 0 ? 
       (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) : 0;
+    
+    // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
+    const jurosPagos = index > 0 
+      ? detalhesProcessed[index - 1].jurosPagos + jurosMesPago 
+      : jurosMesPago;
     
     // Lucro líquido é a diferença entre o ganho real (valorização) e os juros pagos
     const lucroLiquido = ganhoReal - jurosPagos;
@@ -42,6 +48,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       ganhoCapitalAcumulado: ganhoReal, // Mesmo que ganhoReal
       ganhoReal,
       jurosPagos,
+      jurosMesPago, // Adicionando o juro mensal individual
       lucroLiquido,
       valorizacaoPrevista
     } as DetalhesMesProcessado;
@@ -51,7 +58,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   const latestData = detalhesProcessed[detalhesProcessed.length - 1];
   
   // Calculate the sum of all interest paid
-  const totalJurosPagos = detalhesProcessed.reduce((total, mes) => total + mes.jurosPagos, 0);
+  const totalJurosPagos = latestData.jurosPagos; // Agora usamos o valor acumulado do último mês
   
   // Get the valor compra, using the initial value of the property or the first month's value as fallback
   const valorCompra = 'valorCompra' in resultado 
