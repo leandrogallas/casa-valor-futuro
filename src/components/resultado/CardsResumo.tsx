@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowUp, ArrowDown, DollarSign, Calendar, Calculator, TrendingUp, PieChart } from "lucide-react";
+import { ArrowUp, ArrowDown, DollarSign, Calendar, Calculator, TrendingUp, PieChart, Percent } from "lucide-react";
 import { formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 
 interface CardsResumoProps {
@@ -10,6 +10,7 @@ interface CardsResumoProps {
   lucro: number;
   retornoPercentual: number;
   latestData: any;
+  meses: number;
 }
 
 const CardsResumo: React.FC<CardsResumoProps> = ({ 
@@ -17,9 +18,16 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
   valorImovel, 
   lucro, 
   retornoPercentual,
-  latestData
+  latestData,
+  meses
 }) => {
   const isLucro = lucro > 0;
+  
+  // Cálculo da valorização mensal em percentual
+  const valorizacaoMensalPercent = retornoPercentual / meses;
+  
+  // Cálculo da valorização mensal em R$
+  const valorizacaoMensalReais = latestData.lucroLiquido / meses;
   
   return (
     <>
@@ -138,6 +146,37 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
                 <h3 className="text-2xl font-bold">{formatarMoeda(latestData.lucroLiquido)}</h3>
               </div>
               <div className="bg-green-500 p-2 rounded-full text-white">
+                <DollarSign size={20} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Novos Cards de Valorização Mensal */}
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-4">
+        <Card className="bg-gradient-to-br from-cyan-50 to-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Valorização Mensal</p>
+                <h3 className="text-2xl font-bold">{formatarPercentual(valorizacaoMensalPercent)}</h3>
+              </div>
+              <div className="bg-cyan-500 p-2 rounded-full text-white">
+                <Percent size={20} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-emerald-50 to-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Valorização R$ por mês</p>
+                <h3 className="text-2xl font-bold">{formatarMoeda(valorizacaoMensalReais)}</h3>
+              </div>
+              <div className="bg-emerald-500 p-2 rounded-full text-white">
                 <DollarSign size={20} />
               </div>
             </div>

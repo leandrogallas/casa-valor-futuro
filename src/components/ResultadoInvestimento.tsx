@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ResultadoSimulacao, DetalhesMes, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 import CardsResumo from "./resultado/CardsResumo";
@@ -58,6 +57,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         lucro={lucro}
         retornoPercentual={retornoPercentual}
         latestData={latestData}
+        meses={detalhes.length}
       />
       
       <GraficoResultado 
