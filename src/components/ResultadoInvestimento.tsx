@@ -107,8 +107,9 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Calculate the sum of property purchase price and total interest paid
   const valorImovelMaisJuros = valorCompraFinal + totalJurosPagos;
   
-  // Valor da parcela sem correção (total das parcelas dividido pelo número de meses)
-  const valorParcelaSemCorrecao = detalhes.length > 0 ? totalParcelas / detalhes.length : 0;
+  // FIXED CALCULATION: Valor da parcela sem correção
+  // This should be the total amount to be paid in parcels (principal only) divided by number of months
+  const valorParcelaSemCorrecao = (valorCompra - totalEntrada) / detalhes.length;
   
   // Número total de parcelas (igual ao número de meses)
   const numeroParcelas = detalhes.length;
@@ -116,8 +117,9 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Número de reforços (anos)
   const numeroReforcos = Math.floor(detalhes.length / 12);
   
-  // Valor do reforço sem correção (total dos reforços dividido pelo número de reforços)
-  const valorReforcoSemCorrecao = numeroReforcos > 0 ? totalReforcos / numeroReforcos : 0;
+  // FIXED CALCULATION: Valor do reforço sem correção 
+  // This should be the total reinforcement amount divided by number of reinforcements
+  const valorReforcoSemCorrecao = numeroReforcos > 0 ? resultado.totalReforcos / numeroReforcos : 0;
   
   // Get data for specific years to display in the table (yearly increments)
   const yearlyData = detalhesProcessed.filter(item => item.mes % 12 === 0 || item.mes === 1 || item.mes === detalhesProcessed.length);
