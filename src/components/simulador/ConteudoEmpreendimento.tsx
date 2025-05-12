@@ -2,7 +2,7 @@
 import React from "react";
 import FormularioEmpreendimento from "./FormularioEmpreendimento";
 import { RelatorioPreview } from "./relatorio";
-import { DadosEmpreendimento } from "@/types/simulador";
+import { DadosEmpreendimento, DetalhesMesProcessado } from "@/types/simulador";
 import { ResultadoSimulacao } from "@/utils/investmentCalculator";
 import { toast } from "@/components/ui/use-toast";
 
@@ -10,6 +10,7 @@ interface ConteudoEmpreendimentoProps {
   resultado: ResultadoSimulacao | null;
   dados: any;
   dadosEmpreendimento: DadosEmpreendimento;
+  detalhesProcessados: DetalhesMesProcessado[];
   onEmpreendimentoChange: (campo: keyof DadosEmpreendimento, valor: any) => void;
   onEnviarPDF: () => void;
   onGerarPDF: () => void;
@@ -20,6 +21,7 @@ const ConteudoEmpreendimento: React.FC<ConteudoEmpreendimentoProps> = ({
   resultado,
   dados,
   dadosEmpreendimento,
+  detalhesProcessados,
   onEmpreendimentoChange,
   onEnviarPDF,
   onGerarPDF,
@@ -63,6 +65,7 @@ const ConteudoEmpreendimento: React.FC<ConteudoEmpreendimentoProps> = ({
             resultado={resultado}
             dadosSimulacao={dados}
             dadosEmpreendimento={dadosEmpreendimento}
+            detalhesProcessados={detalhesProcessados}
             onGerarPDF={onGerarPDF}
           />
         ) : (

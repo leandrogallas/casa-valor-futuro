@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Settings } from "lucide-react";
 import { ResultadoSimulacao } from "@/utils/investmentCalculator";
-import { DadosSimulacao, DadosEmpreendimento, PDFOptions } from "@/types/simulador";
+import { DadosSimulacao, DadosEmpreendimento, PDFOptions, DetalhesMesProcessado } from "@/types/simulador";
 
 import RelatorioHeader from "./RelatorioHeader";
 import RelatorioPreviewTab from "./RelatorioPreviewTab";
@@ -15,6 +15,7 @@ interface RelatorioPreviewProps {
   resultado: ResultadoSimulacao;
   dadosSimulacao: DadosSimulacao;
   dadosEmpreendimento: DadosEmpreendimento;
+  detalhesProcessados: DetalhesMesProcessado[];
   onGerarPDF: () => void;
 }
 
@@ -22,6 +23,7 @@ const RelatorioPreview: React.FC<RelatorioPreviewProps> = ({
   resultado,
   dadosSimulacao,
   dadosEmpreendimento,
+  detalhesProcessados,
   onGerarPDF
 }) => {
   // Estado para opções de personalização do PDF
@@ -56,6 +58,7 @@ const RelatorioPreview: React.FC<RelatorioPreviewProps> = ({
             dadosSimulacao={dadosSimulacao}
             dadosEmpreendimento={dadosEmpreendimento}
             opcoesPDF={opcoesPDF}
+            detalhesProcessados={detalhesProcessados}
           />
         </TabsContent>
         

@@ -1,15 +1,20 @@
 
 import React from "react";
 import { ResultadoSimulacao, formatarMoeda } from "@/utils/investmentCalculator";
+import { DetalhesMesProcessado } from "@/types/simulador";
 
 interface InvestmentSummaryProps {
   resultado: ResultadoSimulacao;
+  latestData?: DetalhesMesProcessado;
+  retornoPercentual: number;
 }
 
 const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
-  resultado
+  resultado,
+  latestData,
+  retornoPercentual
 }) => {
-  const { totalInvestido, valorImovel, lucro, retornoPercentual } = resultado;
+  const { totalInvestido, valorImovel, lucro } = resultado;
 
   // Ícone com cor
   const getIcon = () => (
@@ -20,7 +25,6 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
     </div>
   );
 
-  // Ensure formatted values use exact same formatting as in CardsResumo component
   return (
     <div>
       <div className="flex items-center gap-3 mb-3">

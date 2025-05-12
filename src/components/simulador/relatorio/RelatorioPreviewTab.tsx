@@ -3,7 +3,7 @@ import React from "react";
 import { CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ResultadoSimulacao } from "@/utils/investmentCalculator";
-import { DadosSimulacao, DadosEmpreendimento, PDFOptions } from "@/types/simulador";
+import { DadosSimulacao, DadosEmpreendimento, PDFOptions, DetalhesMesProcessado } from "@/types/simulador";
 
 import EmpreendimentoInfo from "./components/EmpreendimentoInfo";
 import InvestmentSummary from "./components/InvestmentSummary";
@@ -15,6 +15,7 @@ interface RelatorioPreviewTabProps {
   dadosSimulacao: DadosSimulacao;
   dadosEmpreendimento: DadosEmpreendimento;
   opcoesPDF: PDFOptions;
+  detalhesProcessados?: DetalhesMesProcessado[];
 }
 
 const RelatorioPreviewTab: React.FC<RelatorioPreviewTabProps> = ({
@@ -22,7 +23,21 @@ const RelatorioPreviewTab: React.FC<RelatorioPreviewTabProps> = ({
   dadosSimulacao,
   dadosEmpreendimento,
   opcoesPDF,
+  detalhesProcessados
 }) => {
+  // Calculate additional metrics similar to CardsResumo
+  const latestData = detalhesProcessados && detalhesProcessados.length > 0 
+    ? detalhesProcessados[detalhesProcessados.length - 1] 
+    : undefined;
+  
+  // Calculate values needed for details just like CardsResumo
+  const meses = resultado.detalhes.length;
+  const numeroParcelas = meses;
+  const numeroReforcos = Math.floor(meses / 12);
+  const valorParcelaSemCorrecao = resultado.parcelas / meses;
+  const valorReforcoSemCorrecao = numeroReforcos > 0 ? resultado.reforcos / numeroReforcos : 0;
+  const totalJurosPagos = resultado.totalJurosParcelas + resultado.totalJurosReforcos;
+  
   return (
     <CardContent className="p-6 space-y-6">
       {/* Seção de detalhes do empreendimento */}
@@ -34,14 +49,23 @@ const RelatorioPreviewTab: React.FC<RelatorioPreviewTabProps> = ({
       <Separator />
       
       {/* Seção de resumo financeiro */}
-      <InvestmentSummary resultado={resultado} />
+      <InvestmentSummary 
+        resultado={resultado}
+        latestData={latestData}
+        retornoPercentual={resultado.retornoPercentual} 
+      />
       
       <Separator />
       
       {/* Seção de detalhes do investimento */}
       <InvestmentDetails 
         dadosSimulacao={dadosSimulacao} 
-        resultado={resultado} 
+        resultado={resultado}
+        valorParcelaSemCorrecao={valorParcelaSemCorrecao}
+        valorReforcoSemCorrecao={valorReforcoSemCorrecao}
+        numeroParcelas={numeroParcelas}
+        numeroReforcos={numeroReforcos}
+        totalJurosPagos={totalJurosPagos}
       />
       
       <RelatorioPreviewGraficos opcoesPDF={opcoesPDF} />

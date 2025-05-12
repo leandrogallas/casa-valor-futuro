@@ -1,18 +1,44 @@
 
 import React from "react";
 import { DadosSimulacao } from "@/types/simulador";
-import { ResultadoSimulacao, formatarMoeda } from "@/utils/investmentCalculator";
+import { ResultadoSimulacao, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 
 interface InvestmentDetailsProps {
   dadosSimulacao: DadosSimulacao;
   resultado: ResultadoSimulacao;
+  valorParcelaSemCorrecao?: number;
+  valorReforcoSemCorrecao?: number;
+  numeroParcelas?: number;
+  numeroReforcos?: number;
+  totalJurosPagos?: number;
 }
 
 const InvestmentDetails: React.FC<InvestmentDetailsProps> = ({
   dadosSimulacao,
-  resultado
+  resultado,
+  valorParcelaSemCorrecao,
+  valorReforcoSemCorrecao,
+  numeroParcelas,
+  numeroReforcos,
+  totalJurosPagos
 }) => {
-  const { totalInvestido, totalJurosParcelas, totalJurosReforcos } = resultado;
+  const { 
+    totalInvestido, 
+    totalJurosParcelas, 
+    totalJurosReforcos, 
+    cubInicial,
+    cubFinal,
+    indiceCubFinal
+  } = resultado;
+  
+  // Calcular valores caso não sejam fornecidos
+  const meses = dadosSimulacao.meses;
+  const calculatedNumeroParcelas = numeroParcelas || meses;
+  const calculatedNumeroReforcos = numeroReforcos || Math.floor(meses / 12);
+  const calculatedValorParcelaSemCorrecao = valorParcelaSemCorrecao || (resultado.parcelas / meses);
+  const calculatedValorReforcoSemCorrecao = valorReforcoSemCorrecao || 
+      (calculatedNumeroReforcos > 0 ? dadosSimulacao.reforcos / calculatedNumeroReforcos : 0);
+  const calculatedTotalJurosPagos = totalJurosPagos || (totalJurosParcelas + totalJurosReforcos);
 
   // Ícone com cor
   const getIcon = () => (
@@ -37,29 +63,46 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = ({
             <p className="font-medium">{formatarMoeda(dadosSimulacao.entrada)}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Parcelas</p>
-            <p className="font-medium">{formatarMoeda(dadosSimulacao.parcelas)}</p>
+            <p className="text-sm font-medium text-muted-foreground">Número de Parcelas</p>
+            <p className="font-medium">{calculatedNumeroParcelas} ({Math.floor(calculatedNumeroParcelas / 12)} anos e {calculatedNumeroParcelas % 12} meses)</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Reforços Anuais</p>
-            <p className="font-medium">{formatarMoeda(dadosSimulacao.reforcos)}</p>
+            <p className="text-sm font-medium text-muted-foreground">Valor das Parcelas sem Correção</p>
+            <p className="font-medium">{formatarMoeda(calculatedValorParcelaSemCorrecao)}</p>
+            <p className="text-xs text-muted-foreground">Total: {formatarMoeda(calculatedValorParcelaSemCorrecao * calculatedNumeroParcelas)}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Período</p>
-            <p className="font-medium">{dadosSimulacao.meses} meses ({Math.floor(dadosSimulacao.meses / 12)} anos e {dadosSimulacao.meses % 12} meses)</p>
+            <p className="text-sm font-medium text-muted-foreground">Número de Reforços</p>
+            <p className="font-medium">{calculatedNumeroReforcos} (anuais)</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Total de Juros Pagos (Parcelas)</p>
+            <p className="text-sm font-medium text-muted-foreground">Valor dos Reforços sem Correção</p>
+            <p className="font-medium">{formatarMoeda(calculatedValorReforcoSemCorrecao)}</p>
+            <p className="text-xs text-muted-foreground">Total: {formatarMoeda(calculatedValorReforcoSemCorrecao * calculatedNumeroReforcos)}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Total de Juros (Parcelas)</p>
             <p className="font-medium">{formatarMoeda(totalJurosParcelas)}</p>
+            <p className="text-xs text-muted-foreground">{formatarPercentual(totalJurosParcelas / calculatedTotalJurosPagos * 100)} do total de juros</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Total de Juros Pagos (Reforços)</p>
+            <p className="text-sm font-medium text-muted-foreground">Total de Juros (Reforços)</p>
             <p className="font-medium">{formatarMoeda(totalJurosReforcos)}</p>
+            <p className="text-xs text-muted-foreground">{formatarPercentual(totalJurosReforcos / calculatedTotalJurosPagos * 100)} do total de juros</p>
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground">Custo Total do Imóvel</p>
             <p className="font-medium">{formatarMoeda(totalInvestido)}</p>
             <p className="text-xs text-muted-foreground">Inclui entrada, parcelas e reforços com correção CUB</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">CUB Inicial</p>
+            <p className="font-medium">{formatarMoeda(cubInicial || 0)}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">CUB Final</p>
+            <p className="font-medium">{formatarMoeda(cubFinal || 0)}</p>
+            <p className="text-xs text-muted-foreground">Índice: {(indiceCubFinal || 1).toFixed(4)}</p>
           </div>
         </div>
       </div>
