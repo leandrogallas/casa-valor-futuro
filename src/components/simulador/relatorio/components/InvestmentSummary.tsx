@@ -20,6 +20,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
     </div>
   );
 
+  // Ensure formatted values use exact same formatting as in CardsResumo component
   return (
     <div>
       <div className="flex items-center gap-3 mb-3">

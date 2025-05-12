@@ -3,8 +3,10 @@
 
 /**
  * Formata um valor numérico para o formato de moeda brasileira (BRL)
+ * Mantém consistência no número de casas decimais (0)
  */
 export function formatarMoeda(valor: number): string {
+  // Ensure same decimal precision everywhere
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',

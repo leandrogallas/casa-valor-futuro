@@ -101,7 +101,7 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
     const taxaValorizacaoMensal = Math.pow(1 + valorizacao, 1/12) - 1;
     const valorAtualImovel = valorInicialImovel * Math.pow(1 + taxaValorizacaoMensal, i);
     
-    // Adicionar ao histórico
+    // Adicionar ao histórico - importante manter a mesma precisão de casas decimais
     detalhes.push({
       mes: i,
       investido: parseFloat(valorInvestido.toFixed(2)),
@@ -137,20 +137,20 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
     }
   }
 
-  // Cálculo final dos resultados
-  const valorImovelFinal = valorInicialImovel * Math.pow(1 + valorizacao, meses / 12);
-  const totalInvestidoFinal = detalhes[detalhes.length - 1].investido;
-  const lucro = valorImovelFinal - totalInvestidoFinal;
-  const retornoPercentual = totalInvestidoFinal > 0 ? (lucro / totalInvestidoFinal) * 100 : 0;
+  // Cálculo final dos resultados - mantendo sempre a mesma precisão decimal
+  const valorImovelFinal = parseFloat((valorInicialImovel * Math.pow(1 + valorizacao, meses / 12)).toFixed(2));
+  const totalInvestidoFinal = parseFloat(detalhes[detalhes.length - 1].investido.toFixed(2));
+  const lucro = parseFloat((valorImovelFinal - totalInvestidoFinal).toFixed(2));
+  const retornoPercentual = parseFloat(((totalInvestidoFinal > 0 ? (lucro / totalInvestidoFinal) : 0)).toFixed(4));
   
   // Valor final do CUB
   const cubFinal = detalhes[detalhes.length - 1].valorCubAtual;
 
   return {
     totalInvestido: totalInvestidoFinal,
-    valorImovel: parseFloat(valorImovelFinal.toFixed(2)),
-    lucro: parseFloat(lucro.toFixed(2)),
-    retornoPercentual: parseFloat(retornoPercentual.toFixed(2)),
+    valorImovel: valorImovelFinal,
+    lucro: lucro,
+    retornoPercentual: retornoPercentual,
     taxaCorrecao: variancaoCubAnual,
     valorizacao: valorizacao,
     valorCompra: valorCompra,

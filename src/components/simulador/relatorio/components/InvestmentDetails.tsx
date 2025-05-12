@@ -12,7 +12,7 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = ({
   dadosSimulacao,
   resultado
 }) => {
-  const { totalJurosParcelas, totalJurosReforcos } = resultado;
+  const { totalInvestido, totalJurosParcelas, totalJurosReforcos } = resultado;
 
   // Ícone com cor
   const getIcon = () => (
@@ -55,6 +55,10 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = ({
           <div>
             <p className="text-sm font-medium text-muted-foreground">Total de Juros Pagos (Reforços)</p>
             <p className="font-medium">{formatarMoeda(totalJurosReforcos)}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Total Investido</p>
+            <p className="font-medium">{formatarMoeda(totalInvestido)}</p>
           </div>
         </div>
       </div>
