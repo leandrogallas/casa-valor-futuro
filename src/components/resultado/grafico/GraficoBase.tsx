@@ -19,7 +19,7 @@ interface GraficoBaseProps {
   data: DetalhesMesProcessado[];
   series: SeriesConfig[];
   tooltipFormatters?: Record<string, TooltipFormatter>;
-  filterData?: (data: DetalhesMesProcessado[], index: number) => boolean;
+  filterData?: (item: DetalhesMesProcessado, index: number, array: DetalhesMesProcessado[]) => boolean;
 }
 
 const GraficoBase: React.FC<GraficoBaseProps> = ({ 
