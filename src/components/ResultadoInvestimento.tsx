@@ -114,9 +114,9 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Calculate the sum of property purchase price and total interest paid
   const valorImovelMaisJuros = valorCompraFinal + totalJurosPagos;
   
-  // FIXED CALCULATION: Valor da parcela sem correção
-  // This should be the total amount to be paid in parcels (principal only) divided by number of months
-  const valorParcelaSemCorrecao = (valorCompra - totalEntrada) / detalhes.length;
+  // CORRECTED CALCULATION: Valor da parcela sem correção
+  // Using the total parcelas value directly from resultado (user input) divided by number of months
+  const valorParcelaSemCorrecao = resultado.parcelas / detalhes.length;
   
   // Número total de parcelas (igual ao número de meses)
   const numeroParcelas = detalhes.length;
@@ -124,7 +124,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Número de reforços (anos)
   const numeroReforcos = Math.floor(detalhes.length / 12);
   
-  // FIXED CALCULATION: Valor do reforço sem correção 
+  // CORRECTED CALCULATION: Valor do reforço sem correção 
   // This should be the original total reinforcement amount divided by number of reinforcements (years)
   const valorReforcoSemCorrecao = numeroReforcos > 0 ? resultado.reforcos / numeroReforcos : 0;
   

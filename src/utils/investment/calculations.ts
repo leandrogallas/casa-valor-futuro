@@ -1,4 +1,3 @@
-
 // Core calculation functions for investment simulation
 import { DadosSimulacao, DetalhesMes, ResultadoSimulacao } from './types';
 
@@ -25,8 +24,9 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
   // Dividimos o saldo devedor inicial pelo número total de meses para obter o valor de amortização mensal
   const amortizacaoMensalInicial = saldoDevedorInicial / meses;
   
-  // Valor da parcela mensal inicial (sem correção)
-  let parcelaMensalInicial = amortizacaoMensalInicial;
+  // CORREÇÃO: Valor da parcela mensal inicial (sem correção)
+  // Usamos diretamente o valor total de parcelas dividido pelo número de meses
+  let parcelaMensalInicial = parcelas / meses;
   
   // Variáveis para acompanhamento
   let valorInvestido = entrada;
@@ -73,8 +73,9 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
     return Math.max(0, saldoTemp / meses);
   };
   
-  // Atualiza o valor da parcela mensal base
-  parcelaMensalInicial = calculoMensalidades();
+  // Não precisamos mais usar o valor calculado pelo calculoMensalidades() 
+  // pois estamos usando o valor de parcelas diretamente
+  // parcelaMensalInicial = calculoMensalidades();
   parcelaMensalAtual = parcelaMensalInicial;
   
   // Processamento mês a mês
@@ -194,6 +195,7 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
     reforcos: reforcos,
     cubInicial: cubInicial,
     cubFinal: parseFloat(cubFinal.toFixed(2)),
-    indiceCubFinal: parseFloat((cubFinal / cubInicial).toFixed(4))
+    indiceCubFinal: parseFloat((cubFinal / cubInicial).toFixed(4)),
+    parcelas: parcelas // Mantendo o valor original das parcelas
   };
 }
