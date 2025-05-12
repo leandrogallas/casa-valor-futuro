@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FilePdf } from "lucide-react";
+import { FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ResultadoSimulacao, formatarMoeda } from "@/utils/investmentCalculator";
 import { DadosSimulacao, DadosEmpreendimento } from "@/types/simulador";
@@ -48,7 +48,7 @@ const RelatorioPreview: React.FC<RelatorioPreviewProps> = ({
             </p>
           </div>
           <Button onClick={onGerarPDF} className="bg-investment-primary hover:bg-investment-secondary">
-            <FilePdf className="mr-2 h-4 w-4" />
+            <FileText className="mr-2 h-4 w-4" />
             Baixar PDF
           </Button>
         </div>
@@ -175,7 +175,7 @@ const RelatorioPreview: React.FC<RelatorioPreviewProps> = ({
       <CardFooter className="bg-gray-50 border-t p-4">
         <div className="w-full flex justify-end">
           <Button onClick={onGerarPDF} className="bg-investment-primary hover:bg-investment-secondary">
-            <FilePdf className="mr-2 h-4 w-4" />
+            <FileText className="mr-2 h-4 w-4" />
             Baixar PDF
           </Button>
         </div>

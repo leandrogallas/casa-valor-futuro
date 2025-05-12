@@ -1,7 +1,6 @@
-
 import React from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Mail, FilePdf } from "lucide-react";
+import { CalendarIcon, Mail, FileText } from "lucide-react";
 import { DadosEmpreendimento } from "@/types/simulador";
 import {
   Card,

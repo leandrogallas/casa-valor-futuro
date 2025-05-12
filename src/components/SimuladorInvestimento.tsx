@@ -8,6 +8,7 @@ import ResultadoInvestimento from "./ResultadoInvestimento";
 import { calcularSimulacaoInvestimento, ResultadoSimulacao } from "@/utils/investmentCalculator";
 import { toast } from "@/components/ui/use-toast";
 import { DadosSimulacao, DadosEmpreendimento } from "@/types/simulador";
+import { RelatorioPreview } from "./simulador/RelatorioImports";
 
 const SimuladorInvestimento: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("simulacao");
