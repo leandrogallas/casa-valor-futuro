@@ -1,7 +1,8 @@
 
 import React from "react";
-import { FileText, Mail } from "lucide-react";
-import { CardContent, Separator } from "@/components/ui/card";
+import { FileText } from "lucide-react";
+import { CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { PDFOptions } from "@/types/simulador";
