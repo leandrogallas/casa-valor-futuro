@@ -3,7 +3,7 @@ import React from "react";
 import { formatarPercentual, ResultadoSimulacao, formatarMoeda } from "@/utils/investmentCalculator";
 import { DetalhesMesProcessado } from "@/types/simulador";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building, Coins, TrendingUp, ArrowUp, ArrowDown, DollarSign, Calculator, Landmark, Home, Banknote, PieChart, PercentCircle, Percent, CalendarClock } from "lucide-react";
+import { Building, Coins, TrendingUp, ArrowUp, ArrowDown, DollarSign, Calculator, Landmark, Home, Banknote, PieChart, Percent, CalendarClock } from "lucide-react";
 import MetricCard from "./cards/MetricCard";
 
 interface CardsResumoProps {

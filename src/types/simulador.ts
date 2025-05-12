@@ -1,4 +1,6 @@
 
+import { DetalhesMes } from '@/utils/investment/types';
+
 export interface DadosSimulacao {
   valorMercado: number;
   valorCompra: number;
@@ -17,9 +19,6 @@ export interface DadosEmpreendimento {
   emailCliente: string;
   mensagem: string;
 }
-
-// Importing DetalhesMes directly rather than referencing it from another import
-import { DetalhesMes } from "@/utils/investmentCalculator";
 
 export interface DetalhesMesProcessado extends DetalhesMes {
   ganhoCapitalMensal: number;

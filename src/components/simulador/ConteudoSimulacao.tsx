@@ -3,7 +3,8 @@ import React from "react";
 import FormularioParametros from "./FormularioParametros";
 import TelaInicial from "./TelaInicial";
 import ResultadoInvestimento from "../ResultadoInvestimento";
-import { DadosSimulacao, ResultadoSimulacao } from "@/utils/investmentCalculator";
+import { DadosSimulacao } from "@/types/simulador";
+import { ResultadoSimulacao } from "@/utils/investment/types";
 
 interface ConteudoSimulacaoProps {
   resultado: ResultadoSimulacao | null;
