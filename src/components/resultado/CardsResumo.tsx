@@ -237,7 +237,7 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
                 <Percent size={20} />
               </div>}
               bgColor="from-cyan-50 to-white"
-              subtitle={`${formatarPercentual(resultado.resultado.valorizacao * 100)} ao ano`}
+              subtitle={`${formatarPercentual(resultado.valorizacao * 100)} ao ano`}
             />
             
             <MetricCard
