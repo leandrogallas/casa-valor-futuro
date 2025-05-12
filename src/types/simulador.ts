@@ -10,6 +10,14 @@ export interface DadosSimulacao {
   meses: number;
 }
 
+export interface DadosEmpreendimento {
+  nomeEmpreendimento: string;
+  dataInicio: Date | null;
+  dataEntrega: Date | null;
+  emailCliente: string;
+  mensagem: string;
+}
+
 // Importing DetalhesMes directly rather than referencing it from another import
 import { DetalhesMes } from "@/utils/investmentCalculator";
 
