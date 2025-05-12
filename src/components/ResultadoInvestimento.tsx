@@ -51,6 +51,9 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Latest data for cards
   const latestData = detalhesProcessed[detalhesProcessed.length - 1];
   
+  // Calculate the sum of all interest paid
+  const totalJurosPagos = detalhesProcessed.reduce((total, mes) => total + mes.jurosPagos, 0);
+  
   // Get data for specific years to display in the table (yearly increments)
   const yearlyData = detalhesProcessed.filter(item => item.mes % 12 === 0 || item.mes === 1 || item.mes === detalhesProcessed.length);
 
@@ -65,6 +68,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         retornoPercentual={retornoPercentual}
         latestData={latestData}
         meses={detalhes.length}
+        totalJurosPagos={totalJurosPagos}
       />
       
       <GraficoResultado 

@@ -37,6 +37,13 @@ const GraficoGlobal: React.FC<GraficoGlobalProps> = ({ detalhesProcessed }) => {
       color: "#0EA5E9",
       type: "line",
       formatter: formatters.currency
+    },
+    {
+      dataKey: "jurosPagos",
+      name: "Juros Pagos",
+      color: "#EF4444",
+      type: "line",
+      formatter: formatters.currency
     }
   ];
 

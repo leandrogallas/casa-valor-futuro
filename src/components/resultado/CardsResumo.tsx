@@ -11,6 +11,7 @@ interface CardsResumoProps {
   retornoPercentual: number;
   latestData: any;
   meses: number;
+  totalJurosPagos: number;
 }
 
 const CardsResumo: React.FC<CardsResumoProps> = ({ 
@@ -19,7 +20,8 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
   lucro, 
   retornoPercentual,
   latestData,
-  meses
+  meses,
+  totalJurosPagos
 }) => {
   const isLucro = lucro > 0;
   
@@ -153,8 +155,8 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
         </Card>
       </div>
 
-      {/* Novos Cards de Valorização Mensal */}
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-4">
+      {/* Novos Cards de Valorização Mensal e Juros Pagos */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
         <Card className="bg-gradient-to-br from-cyan-50 to-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -178,6 +180,20 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
               </div>
               <div className="bg-emerald-500 p-2 rounded-full text-white">
                 <DollarSign size={20} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-red-50 to-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total de Juros Pagos</p>
+                <h3 className="text-2xl font-bold">{formatarMoeda(totalJurosPagos)}</h3>
+              </div>
+              <div className="bg-red-500 p-2 rounded-full text-white">
+                <Calculator size={20} />
               </div>
             </div>
           </CardContent>
