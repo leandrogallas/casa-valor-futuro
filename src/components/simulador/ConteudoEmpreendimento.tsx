@@ -1,7 +1,7 @@
 
 import React from "react";
 import FormularioEmpreendimento from "./FormularioEmpreendimento";
-import { RelatorioPreview } from "./RelatorioImports";
+import { RelatorioPreview } from "./relatorio";
 import { DadosEmpreendimento } from "@/types/simulador";
 import { ResultadoSimulacao } from "@/utils/investmentCalculator";
 import { toast } from "@/components/ui/use-toast";
