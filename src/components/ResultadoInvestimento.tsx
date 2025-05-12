@@ -14,8 +14,10 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
 
   const { totalInvestido, valorImovel, lucro, retornoPercentual, detalhes } = resultado;
 
-  // Calculate additional metrics for each month
-  const detalhesProcessed = detalhes.map((mes, index) => {
+  // Calculate additional metrics for each month in a way that avoids circular references
+  const detalhesProcessed: DetalhesMesProcessado[] = [];
+  
+  detalhes.forEach((mes, index) => {
     const mesAnterior = index > 0 ? detalhes[index - 1] : null;
     
     // Monthly capital gain (valorização do mês)
@@ -32,6 +34,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) : 0;
     
     // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
+    // Use the previously calculated item in detalhesProcessed array
     const jurosPagos = index > 0 
       ? detalhesProcessed[index - 1].jurosPagos + jurosMesPago 
       : jurosMesPago;
@@ -42,7 +45,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
     // Valorização prevista (acumulada desde o início)
     const valorizacaoPrevista = mes.valorImovel - resultado.detalhes[0].valorImovel;
     
-    return {
+    detalhesProcessed.push({
       ...mes,
       ganhoCapitalMensal,
       ganhoCapitalAcumulado: ganhoReal, // Mesmo que ganhoReal
@@ -51,7 +54,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       jurosMesPago, // Adicionando o juro mensal individual
       lucroLiquido,
       valorizacaoPrevista
-    } as DetalhesMesProcessado;
+    });
   });
 
   // Latest data for cards
