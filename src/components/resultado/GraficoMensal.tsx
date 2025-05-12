@@ -1,7 +1,7 @@
 
 import React from "react";
 import { ResponsiveContainer, CartesianGrid, Legend, Bar, Line, XAxis, YAxis, Tooltip, ComposedChart } from "recharts";
-import CustomTooltip from "./CustomTooltip";
+import CustomTooltip, { formatters } from "./CustomTooltip";
 import { DetalhesMesProcessado } from "@/types/simulador";
 
 interface GraficoMensalProps {
@@ -20,7 +20,16 @@ const GraficoMensal: React.FC<GraficoMensalProps> = ({ detalhesProcessed }) => {
             compactDisplay: 'short',
           }).format(value)}`}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip 
+          content={
+            <CustomTooltip 
+              formatters={{
+                ganhoCapitalMensal: formatters.currency,
+                ganhoCapitalAcumulado: formatters.currency
+              }}
+            />
+          } 
+        />
         <Legend verticalAlign="top" height={36} />
         <Bar 
           dataKey="ganhoCapitalMensal" 

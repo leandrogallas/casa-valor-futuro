@@ -1,7 +1,7 @@
 
 import React from "react";
 import { ResponsiveContainer, CartesianGrid, Legend, Line, XAxis, YAxis, Tooltip, ComposedChart } from "recharts";
-import CustomTooltip from "./CustomTooltip";
+import CustomTooltip, { formatters } from "./CustomTooltip";
 import { DetalhesMesProcessado } from "@/types/simulador";
 
 interface GraficoComparativoProps {
@@ -20,7 +20,17 @@ const GraficoComparativo: React.FC<GraficoComparativoProps> = ({ detalhesProcess
             compactDisplay: 'short',
           }).format(value)}`}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip 
+          content={
+            <CustomTooltip 
+              formatters={{
+                valorImovel: formatters.currency,
+                valorizacaoPrevista: formatters.currency,
+                lucroLiquido: formatters.currency
+              }}
+            />
+          } 
+        />
         <Legend verticalAlign="top" height={36} />
         <Line 
           type="monotone" 
