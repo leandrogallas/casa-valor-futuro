@@ -1,4 +1,4 @@
 
-import RelatorioPreview from "./RelatorioPreview";
+import { RelatorioPreview } from "./relatorio";
 
 export { RelatorioPreview };

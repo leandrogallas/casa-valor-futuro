@@ -41,7 +41,7 @@ export interface DetalhesMesProcessado extends DetalhesMes {
 export interface PDFOptions {
   incluirGraficoGlobal: boolean;
   incluirGraficoMensal: boolean;
-  incluirGraficoComparativo: boolean;
+  incluirGraficoComparativo?: boolean;
   incluirTabela: boolean;
   temaFundo?: 'light' | 'dark';
 }
