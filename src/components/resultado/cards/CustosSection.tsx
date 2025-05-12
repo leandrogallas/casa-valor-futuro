@@ -10,6 +10,7 @@ interface CustosSectionProps {
   totalJurosReforcos: number;
   totalJurosPagos: number;
   valorCompra: number;
+  totalInvestido: number; // Added totalInvestido parameter
   cubInicial?: number;
   cubFinal?: number;
   indiceCubFinal?: number;
@@ -20,6 +21,7 @@ const CustosSection: React.FC<CustosSectionProps> = ({
   totalJurosReforcos,
   totalJurosPagos,
   valorCompra,
+  totalInvestido,
   cubInicial,
   cubFinal,
   indiceCubFinal
@@ -66,12 +68,12 @@ const CustosSection: React.FC<CustosSectionProps> = ({
           
           <MetricCard
             title="Custo Total do Imóvel"
-            value={formatarMoeda(valorCompra + totalJurosPagos)}
+            value={formatarMoeda(totalInvestido)}
             icon={<div className="bg-rose-500 p-2 rounded-full text-white">
               <Building size={20} />
             </div>}
             bgColor="from-rose-50 to-white"
-            subtitle={`Valor inicial (${formatarMoeda(valorCompra)}) + Total de juros`}
+            subtitle={`Valor inicial (${formatarMoeda(valorCompra)}) + Parcelas + Reforços (com juros)`}
           />
 
           <MetricCard

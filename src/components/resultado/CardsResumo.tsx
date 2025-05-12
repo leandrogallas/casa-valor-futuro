@@ -74,6 +74,7 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
         totalJurosReforcos={totalJurosReforcos}
         totalJurosPagos={totalJurosPagos}
         valorCompra={valorCompra}
+        totalInvestido={totalInvestido} // Pass totalInvestido to CustosSection
         cubInicial={cubInicial}
         cubFinal={cubFinal}
         indiceCubFinal={indiceCubFinal}

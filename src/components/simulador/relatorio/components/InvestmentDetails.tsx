@@ -1,7 +1,7 @@
 
 import React from "react";
-import { DadosSimulacao, ResultadoSimulacao } from "@/utils/investmentCalculator";
-import { formatarMoeda } from "@/utils/investmentCalculator";
+import { DadosSimulacao } from "@/types/simulador";
+import { ResultadoSimulacao, formatarMoeda } from "@/utils/investmentCalculator";
 
 interface InvestmentDetailsProps {
   dadosSimulacao: DadosSimulacao;
@@ -57,8 +57,9 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = ({
             <p className="font-medium">{formatarMoeda(totalJurosReforcos)}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Total Investido</p>
+            <p className="text-sm font-medium text-muted-foreground">Custo Total do Imóvel</p>
             <p className="font-medium">{formatarMoeda(totalInvestido)}</p>
+            <p className="text-xs text-muted-foreground">Inclui entrada, parcelas e reforços com correção CUB</p>
           </div>
         </div>
       </div>

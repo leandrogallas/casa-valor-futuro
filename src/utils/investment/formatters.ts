@@ -6,7 +6,7 @@
  * Mantém consistência no número de casas decimais (0)
  */
 export function formatarMoeda(valor: number): string {
-  // Ensure same decimal precision everywhere
+  // Ensure same decimal precision everywhere (zero decimal places)
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
