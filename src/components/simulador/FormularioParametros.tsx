@@ -13,6 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { DadosSimulacao } from "@/types/simulador";
+import { InfoCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FormularioParametrosProps {
   dados: DadosSimulacao;
@@ -74,7 +81,7 @@ const FormularioParametros: React.FC<FormularioParametrosProps> = ({
         <Separator />
         
         <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground">Taxas</h3>
+          <h3 className="font-semibold text-sm text-muted-foreground">Taxas e Índices</h3>
           <div className="space-y-2">
             <div className="flex justify-between">
               <Label htmlFor="valorizacao">Valorização Anual</Label>
@@ -98,25 +105,73 @@ const FormularioParametros: React.FC<FormularioParametrosProps> = ({
           </div>
           
           <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label htmlFor="correcao">Correção Anual das Parcelas</Label>
-              <span className="text-sm font-medium">{formatarPercentual(dados.correcao)}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <Label htmlFor="cubInicial">Valor do CUB Inicial (R$/m²)</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help text-muted-foreground">
+                        <InfoCircle size={14} />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-sm">
+                      <p>Custo Unitário Básico na data do contrato. Este é o valor base para as correções.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <span className="text-sm font-medium">{formatarPercentual(dados.cubInicial)}</span>
+            </div>
+            <Input
+              id="cubInicial"
+              type="number"
+              value={dados.cubInicial}
+              onChange={handleInputChange('cubInicial')}
+              step="1"
+              className="mt-1"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <Label htmlFor="variancaoCubAnual">Variação Anual do CUB</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help text-muted-foreground">
+                        <InfoCircle size={14} />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-sm">
+                      <p>Variação anual média do CUB que será aplicada para corrigir parcelas e reforços.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <span className="text-sm font-medium">{formatarPercentual(dados.variancaoCubAnual)}</span>
             </div>
             <Slider
-              id="correcao"
+              id="variancaoCubAnual"
               min={0}
               max={0.15}
               step={0.01}
-              value={[dados.correcao]}
-              onValueChange={handleSliderChange('correcao')}
+              value={[dados.variancaoCubAnual]}
+              onValueChange={handleSliderChange('variancaoCubAnual')}
             />
             <Input
               type="number"
-              value={dados.correcao}
-              onChange={handleInputChange('correcao')}
+              value={dados.variancaoCubAnual}
+              onChange={handleInputChange('variancaoCubAnual')}
               step="0.01"
               className="mt-1"
             />
+          </div>
+          
+          <div className="p-3 bg-blue-50 rounded-md text-sm text-blue-800 border border-blue-200">
+            <p className="font-medium mb-1">O que é o CUB?</p>
+            <p>O Custo Unitário Básico (CUB) é um indicador dos custos de construção civil, utilizado para correção de contratos imobiliários. A fórmula usada é: <span className="font-mono bg-white px-1 rounded">Valor corrigido = Valor original × (CUB atual / CUB inicial)</span></p>
           </div>
         </div>
         

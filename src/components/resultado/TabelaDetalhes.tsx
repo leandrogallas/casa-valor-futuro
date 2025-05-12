@@ -17,6 +17,8 @@ const TabelaDetalhes: React.FC<TabelaDetalhesProps> = ({ yearlyData }) => {
               <tr className="bg-muted border-b">
                 <th className="py-2 px-3 text-left font-medium">Ano</th>
                 <th className="py-2 px-3 text-left font-medium">Mês</th>
+                <th className="py-2 px-3 text-left font-medium">CUB</th>
+                <th className="py-2 px-3 text-left font-medium">Índice</th>
                 <th className="py-2 px-3 text-left font-medium">Investido</th>
                 <th className="py-2 px-3 text-left font-medium">Valor Imóvel</th>
                 <th className="py-2 px-3 text-left font-medium">Saldo Devedor</th>
@@ -31,6 +33,8 @@ const TabelaDetalhes: React.FC<TabelaDetalhesProps> = ({ yearlyData }) => {
                 <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-muted/30'}>
                   <td className="py-2 px-3 border-b">{Math.ceil(mes.mes/12)}</td>
                   <td className="py-2 px-3 border-b">{mes.mes}</td>
+                  <td className="py-2 px-3 border-b">{formatarMoeda(mes.valorCubAtual)}</td>
+                  <td className="py-2 px-3 border-b">{mes.indiceCubMensal?.toFixed(4)}</td>
                   <td className="py-2 px-3 border-b">{formatarMoeda(mes.investido)}</td>
                   <td className="py-2 px-3 border-b">{formatarMoeda(mes.valorImovel)}</td>
                   <td className="py-2 px-3 border-b">{formatarMoeda(mes.saldoDevedor)}</td>
@@ -51,12 +55,14 @@ const TabelaDetalhes: React.FC<TabelaDetalhesProps> = ({ yearlyData }) => {
       <div className="mt-4 p-4 bg-gray-50 rounded-md text-sm">
         <p className="font-medium">Legenda:</p>
         <ul className="mt-2 space-y-1">
+          <li><span className="font-medium">CUB:</span> Valor do CUB no mês</li>
+          <li><span className="font-medium">Índice:</span> Relação CUB atual/CUB inicial (fator de correção)</li>
           <li><span className="font-medium">Investido:</span> Total investido até o período</li>
           <li><span className="font-medium">Valor Imóvel:</span> Valor projetado do imóvel com valorização</li>
           <li><span className="font-medium">Saldo Devedor:</span> Valor restante a pagar</li>
           <li><span className="font-medium">Valorização:</span> Aumento no valor do imóvel desde a compra</li>
           <li><span className="font-medium">Reforço:</span> Indica se houve pagamento de reforço anual neste mês</li>
-          <li><span className="font-medium">Juros Mês:</span> Juros pagos no mês (parcelas + reforços)</li>
+          <li><span className="font-medium">Juros Mês:</span> Juros pagos no mês (diferença entre valor corrigido e original)</li>
           <li><span className="font-medium">Lucro Líquido:</span> Ganho real considerando todos os custos</li>
         </ul>
       </div>

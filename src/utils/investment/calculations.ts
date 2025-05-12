@@ -4,12 +4,13 @@ import { DadosSimulacao, DetalhesMes, ResultadoSimulacao } from './types';
 
 /**
  * Calcula a simulação de investimento imobiliário com base nos dados fornecidos
+ * Utilizando o CUB (Custo Unitário Básico) como índice de correção
  */
 export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoSimulacao {
-  const { valorMercado, valorCompra, valorizacao, correcao, entrada, parcelas, reforcos, meses } = dados;
+  const { valorMercado, valorCompra, valorizacao, cubInicial, variancaoCubAnual, entrada, parcelas, reforcos, meses } = dados;
 
-  // Calcular a taxa mensal de correção a partir da taxa anual
-  const taxaMensal = Math.pow(1 + correcao, 1 / 12) - 1;
+  // Calcular a taxa mensal de correção CUB a partir da taxa anual
+  const variancaoCubMensal = Math.pow(1 + variancaoCubAnual, 1 / 12) - 1;
   
   // Número de reforços anuais esperados (total de anos)
   const numAnos = Math.floor(meses / 12);
@@ -28,51 +29,72 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
   let parcelasPagas = 0;
   let reforcosPagos = 0;
   let saldoDevedor = saldoDevedorInicial;
+  let totalJurosParcelas = 0;
+  let totalJurosReforcos = 0;
   let detalhes: DetalhesMes[] = [];
   
   // Valor inicial do imóvel
   const valorInicialImovel = valorMercado;
   
-  // A parcela mensal será corrigida anualmente
+  // A parcela mensal será corrigida pelo CUB
   let parcelaMensalAtual = parcelaMensalInicial;
   
-  // O valor do reforço anual também será corrigido anualmente
+  // O valor do reforço anual também será corrigido pelo CUB
   let reforcoAnualAtual = reforcoAnualInicial;
+  
+  // Valor atual do CUB (começa com o inicial e será atualizado mensalmente)
+  let cubAtual = cubInicial;
   
   // Processamento mês a mês
   for (let i = 1; i <= meses; i++) {
-    // Correção anual da parcela e do reforço (a cada 12 meses)
-    // No primeiro mês de cada ano (exceto o primeiro ano), aplicamos a correção
-    if (i > 1 && (i - 1) % 12 === 0) {
-      // Aplicar a correção anual à parcela e ao reforço
-      parcelaMensalAtual = parcelaMensalAtual * (1 + correcao);
-      reforcoAnualAtual = reforcoAnualAtual * (1 + correcao);
+    // Atualizar o valor do CUB para o mês atual
+    if (i > 1) {
+      cubAtual = cubAtual * (1 + variancaoCubMensal);
     }
+    
+    // Calcular o índice de correção do CUB (CUB atual / CUB inicial)
+    const indiceCub = cubAtual / cubInicial;
+    
+    // Correção anual da parcela e do reforço com base no CUB (a cada 12 meses)
+    if (i > 1 && (i - 1) % 12 === 0) {
+      // Aplicar a correção anual com base no CUB
+      const indiceCubAnual = cubAtual / cubInicial;
+      parcelaMensalAtual = parcelaMensalInicial * indiceCubAnual;
+      reforcoAnualAtual = reforcoAnualInicial * indiceCubAnual;
+      
+      // Calcular juros como a diferença entre valor corrigido e valor original
+      const jurosParcela = parcelaMensalAtual - parcelaMensalInicial;
+      totalJurosParcelas += jurosParcela * 12; // para os próximos 12 meses
+    }
+    
+    // Calcular valor da parcela atual com índice CUB
+    const parcelaCubCorrigida = parcelaMensalInicial * indiceCub;
     
     // Atualizar o saldo devedor
-    if (i === 1) {
-      // No primeiro mês, apenas reduzimos o saldo pelo valor da parcela inicial
-      saldoDevedor -= parcelaMensalAtual;
-    } else {
-      // Nos meses seguintes, consideramos a amortização com parcela corrigida
-      saldoDevedor -= parcelaMensalAtual;
-    }
+    saldoDevedor -= parcelaCubCorrigida;
     
     // Adicionar a parcela mensal ao total investido
-    valorInvestido += parcelaMensalAtual;
-    parcelasPagas += parcelaMensalAtual;
+    valorInvestido += parcelaCubCorrigida;
+    parcelasPagas += parcelaCubCorrigida;
     
     // Flag para indicar se este mês tem reforço
     let temReforcoNesteMes = false;
     
-    // Aplicar reforço anual ao final de cada ano com o valor corrigido
+    // Aplicar reforço anual ao final de cada ano com o valor corrigido pelo CUB
     if (i % 12 === 0 && i / 12 <= numAnos) {
       temReforcoNesteMes = true;
       
+      // Calcular o reforço corrigido pelo CUB atual
+      const reforcoCubCorrigido = reforcoAnualInicial * indiceCub;
+      
+      // Calcular juros como a diferença entre valor corrigido e valor original
+      const jurosReforco = reforcoCubCorrigido - reforcoAnualInicial;
+      totalJurosReforcos += jurosReforco;
+      
       // Aplicar o reforço ao saldo devedor
-      saldoDevedor = saldoDevedor - reforcoAnualAtual;
-      valorInvestido += reforcoAnualAtual;
-      reforcosPagos += reforcoAnualAtual;
+      saldoDevedor = saldoDevedor - reforcoCubCorrigido;
+      valorInvestido += reforcoCubCorrigido;
+      reforcosPagos += reforcoCubCorrigido;
     }
     
     // Cálculo da valorização do imóvel (taxa mensal calculada a partir da anual)
@@ -87,8 +109,10 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
       saldoDevedor: parseFloat(Math.max(0, saldoDevedor).toFixed(2)),
       parcelasPagas: parseFloat(parcelasPagas.toFixed(2)),
       reforcosPagos: parseFloat(reforcosPagos.toFixed(2)),
-      parcelaMensal: parseFloat(parcelaMensalAtual.toFixed(2)),
-      temReforco: temReforcoNesteMes
+      parcelaMensal: parseFloat(parcelaCubCorrigida.toFixed(2)),
+      temReforco: temReforcoNesteMes,
+      valorCubAtual: parseFloat(cubAtual.toFixed(2)),
+      indiceCubMensal: parseFloat(indiceCub.toFixed(4))
     });
     
     // Ajuste no último mês para garantir saldo devedor zero
@@ -113,32 +137,32 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
     }
   }
 
-  // CORREÇÃO: Cálculo dos juros das parcelas como valor da parcela * (taxa anual / 12) * período total
-  const jurosParcelasTotal = parcelaMensalInicial * (correcao / 12) * meses;
-  
-  // Cálculo dos juros dos reforços como taxa anual sobre cada reforço anual
-  const jurosReforcosTotal = reforcoAnualInicial * correcao * numAnos;
-
   // Cálculo final dos resultados
   const valorImovelFinal = valorInicialImovel * Math.pow(1 + valorizacao, meses / 12);
   const totalInvestidoFinal = detalhes[detalhes.length - 1].investido;
   const lucro = valorImovelFinal - totalInvestidoFinal;
   const retornoPercentual = totalInvestidoFinal > 0 ? (lucro / totalInvestidoFinal) * 100 : 0;
+  
+  // Valor final do CUB
+  const cubFinal = detalhes[detalhes.length - 1].valorCubAtual;
 
   return {
     totalInvestido: totalInvestidoFinal,
     valorImovel: parseFloat(valorImovelFinal.toFixed(2)),
     lucro: parseFloat(lucro.toFixed(2)),
     retornoPercentual: parseFloat(retornoPercentual.toFixed(2)),
-    taxaCorrecao: correcao,
+    taxaCorrecao: variancaoCubAnual,
     valorizacao: valorizacao,
     valorCompra: valorCompra,
     totalEntrada: entrada,
     totalParcelas: parseFloat(parcelasPagas.toFixed(2)),
     totalReforcos: parseFloat(reforcosPagos.toFixed(2)),
-    totalJurosParcelas: parseFloat(jurosParcelasTotal.toFixed(2)),
-    totalJurosReforcos: parseFloat(jurosReforcosTotal.toFixed(2)),
+    totalJurosParcelas: parseFloat(totalJurosParcelas.toFixed(2)),
+    totalJurosReforcos: parseFloat(totalJurosReforcos.toFixed(2)),
     detalhes,
-    reforcos: reforcos
+    reforcos: reforcos,
+    cubInicial: cubInicial,
+    cubFinal: parseFloat(cubFinal.toFixed(2)),
+    indiceCubFinal: parseFloat((cubFinal / cubInicial).toFixed(4))
   };
 }

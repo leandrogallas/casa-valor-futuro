@@ -5,7 +5,8 @@ export interface DadosSimulacao {
   valorMercado: number;
   valorCompra: number;
   valorizacao: number;
-  correcao: number;
+  cubInicial: number;      // Valor do CUB na data base
+  variancaoCubAnual: number; // Variação anual média do CUB
   entrada: number;
   parcelas: number;
   reforcos: number;
@@ -21,6 +22,8 @@ export interface DetalhesMes {
   reforcosPagos: number;
   parcelaMensal: number; // Valor da parcela mensal atualizada
   temReforco: boolean; // Indica se este mês tem reforço
+  valorCubAtual?: number; // Valor do CUB no mês atual
+  indiceCubMensal?: number; // Índice de correção CUB mensal
 }
 
 export interface ResultadoSimulacao {
@@ -35,7 +38,10 @@ export interface ResultadoSimulacao {
   totalReforcos: number;
   totalJurosParcelas: number;
   totalJurosReforcos: number;
-  valorizacao: number; // Adding the valorizacao property to fix the build error
+  valorizacao: number;
   detalhes: DetalhesMes[];
   reforcos: number; // Original reforcos value from input data (uncorrected)
+  cubInicial?: number;
+  cubFinal?: number;
+  indiceCubFinal?: number;
 }

@@ -9,7 +9,8 @@ export function useSimulacao() {
     valorMercado: 500000,
     valorCompra: 450000,
     valorizacao: 0.12,
-    correcao: 0.06,
+    cubInicial: 2000,       // Valor inicial do CUB (R$/m²)
+    variancaoCubAnual: 0.06, // Variação anual média do CUB (6%)
     entrada: 90000,
     parcelas: 360000,
     reforcos: 70000,
@@ -81,11 +82,11 @@ export function useSimulacao() {
       // Ganho real é apenas a valorização do imóvel
       const ganhoReal = mes.valorImovel - detalhes[0].valorImovel;
       
-      // Juros pagos são a parte da parcela que não amortiza a dívida
-      // Calculamos o juro com base na taxa sobre o saldo devedor anterior
-      const jurosMesPago = index > 0 
-        ? (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) 
-        : 0;
+      // Juros pagos são calculados como a diferença entre o valor corrigido pelo CUB e o valor original
+      // Calculamos o juro com base no índice do CUB
+      const indiceCub = mes.indiceCubMensal || 1;
+      const valorParcelaSemCorrecao = resultado.valorCompra / resultado.detalhes.length;
+      const jurosMesPago = (mes.parcelaMensal - valorParcelaSemCorrecao);
       
       // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
       const jurosPagos = index > 0 
@@ -93,8 +94,9 @@ export function useSimulacao() {
         : jurosMesPago;
       
       // Juros relacionados aos reforços para este mês específico
-      const jurosReforcoMesPago = mes.temReforco && index > 0
-        ? (resultado.totalJurosReforcos / Math.floor(detalhes.length / 12)) * (Math.floor(index / 12) + 1) / Math.floor(detalhes.length / 12)
+      const valorReforcoSemCorrecao = resultado.reforcos / Math.floor(resultado.detalhes.length / 12);
+      const jurosReforcoMesPago = mes.temReforco 
+        ? ((valorReforcoSemCorrecao * indiceCub) - valorReforcoSemCorrecao)
         : 0;
       
       // Juros acumulados relacionados aos reforços
@@ -125,7 +127,9 @@ export function useSimulacao() {
         lucroLiquido,
         lucroLiquidoComComissao,
         valorizacaoPrevista,
-        temReforco: mes.temReforco
+        temReforco: mes.temReforco,
+        valorCubAtual: mes.valorCubAtual || dados.cubInicial,
+        indiceCubMensal: mes.indiceCubMensal || 1
       });
     });
     

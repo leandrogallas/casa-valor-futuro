@@ -23,6 +23,9 @@ interface CardsResumoProps {
   numeroParcelas: number;
   numeroReforcos: number;
   valorReforcoSemCorrecao: number;
+  cubInicial?: number;
+  cubFinal?: number;
+  indiceCubFinal?: number;
 }
 
 const CardsResumo: React.FC<CardsResumoProps> = ({
@@ -41,7 +44,10 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
   valorParcelaSemCorrecao,
   numeroParcelas,
   numeroReforcos,
-  valorReforcoSemCorrecao
+  valorReforcoSemCorrecao,
+  cubInicial,
+  cubFinal,
+  indiceCubFinal
 }) => {
   // Cálculo da valorização mensal em percentual
   const valorizacaoMensalPercent = retornoPercentual / meses;
@@ -68,6 +74,9 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
         totalJurosReforcos={totalJurosReforcos}
         totalJurosPagos={totalJurosPagos}
         valorCompra={valorCompra}
+        cubInicial={cubInicial}
+        cubFinal={cubFinal}
+        indiceCubFinal={indiceCubFinal}
       />
 
       {/* Seção 3: Valorização do Imóvel */}

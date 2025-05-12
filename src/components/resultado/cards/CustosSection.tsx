@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Coins, Calculator, Building, Landmark } from "lucide-react";
+import { Coins, Calculator, Building, Landmark, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MetricCard from "./MetricCard";
 import { formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
@@ -10,24 +10,30 @@ interface CustosSectionProps {
   totalJurosReforcos: number;
   totalJurosPagos: number;
   valorCompra: number;
+  cubInicial?: number;
+  cubFinal?: number;
+  indiceCubFinal?: number;
 }
 
 const CustosSection: React.FC<CustosSectionProps> = ({
   totalJurosParcelas,
   totalJurosReforcos,
   totalJurosPagos,
-  valorCompra
+  valorCompra,
+  cubInicial,
+  cubFinal,
+  indiceCubFinal
 }) => {
   return (
     <Card className="shadow-md border-t-4 border-t-red-500">
       <CardHeader>
         <CardTitle className="flex items-center text-xl text-red-700">
           <Coins className="mr-2" /> 
-          Custos da Operação
+          Custos da Operação (Correção CUB)
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <MetricCard
             title="Juros das Parcelas"
             value={formatarMoeda(totalJurosParcelas)}
@@ -67,6 +73,34 @@ const CustosSection: React.FC<CustosSectionProps> = ({
             bgColor="from-rose-50 to-white"
             subtitle={`Valor inicial (${formatarMoeda(valorCompra)}) + Total de juros`}
           />
+
+          <MetricCard
+            title="CUB Inicial"
+            value={formatarMoeda(cubInicial || 0)}
+            icon={<div className="bg-blue-500 p-2 rounded-full text-white">
+              <TrendingUp size={20} />
+            </div>}
+            bgColor="from-blue-50 to-white"
+            subtitle="Valor CUB na data do contrato"
+          />
+          
+          <MetricCard
+            title="CUB Final"
+            value={formatarMoeda(cubFinal || 0)}
+            icon={<div className="bg-indigo-500 p-2 rounded-full text-white">
+              <TrendingUp size={20} />
+            </div>}
+            bgColor="from-indigo-50 to-white"
+            subtitle={`Índice: ${(indiceCubFinal || 1).toFixed(4)}`}
+          />
+        </div>
+
+        <div className="mt-5 p-4 bg-gray-50 rounded-md">
+          <h3 className="font-medium mb-2">Sobre a Correção pelo CUB</h3>
+          <p className="text-sm text-muted-foreground">
+            O CUB (Custo Unitário Básico) é utilizado para corrigir o valor das parcelas e reforços ao longo do tempo.
+            A fórmula aplicada é: <span className="font-mono bg-gray-100 px-1">Valor corrigido = Valor base × (CUB atual / CUB inicial)</span>
+          </p>
         </div>
       </CardContent>
     </Card>

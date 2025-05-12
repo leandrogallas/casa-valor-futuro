@@ -5,7 +5,8 @@ export interface DadosSimulacao {
   valorMercado: number;
   valorCompra: number;
   valorizacao: number;
-  correcao: number;
+  cubInicial: number;      // Valor do CUB na data base
+  variancaoCubAnual: number; // Variação anual média do CUB (ex: 0.06 para 6%)
   entrada: number;
   parcelas: number;
   reforcos: number;
@@ -32,6 +33,8 @@ export interface DetalhesMesProcessado extends DetalhesMes {
   lucroLiquidoComComissao: number; // Lucro líquido após dedução de 5% de comissão
   valorizacaoPrevista: number;
   temReforco: boolean; // Indica se neste mês houve pagamento de reforço
+  valorCubAtual: number; // Valor do CUB no mês atual
+  indiceCubMensal: number; // Índice de correção CUB mensal (CUB_atual/CUB_inicial)
 }
 
 // Configurações para personalização do PDF

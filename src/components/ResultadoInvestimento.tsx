@@ -1,3 +1,4 @@
+
 import React from "react";
 import { ResultadoSimulacao, DetalhesMes, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 import CardsResumo from "./resultado/CardsResumo";
@@ -22,7 +23,10 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
     valorCompra,
     totalEntrada,
     totalParcelas,
-    totalReforcos
+    totalReforcos,
+    cubInicial,
+    cubFinal,
+    indiceCubFinal
   } = resultado;
 
   // Calculate additional metrics for each month in a way that avoids circular references
@@ -40,11 +44,11 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       // Ganho capital é a valorização do imóvel menos o valor de compra
       const ganhoCapital = mes.valorImovel - valorCompra;
       
-      // Juros pagos são a parte da parcela que não amortiza a dívida
-      // Calculamos o juro com base na taxa sobre o saldo devedor anterior
-      const jurosMesPago = index > 0 
-        ? (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) 
-        : 0;
+      // Juros pagos são calculados como a diferença entre o valor corrigido pelo CUB e o valor original
+      // Usando o índice CUB mensal se disponível
+      const indiceCub = mes.indiceCubMensal || 1;
+      const valorParcelaSemCorrecao = resultado.valorCompra / resultado.detalhes.length;
+      const jurosMesPago = (mes.parcelaMensal - valorParcelaSemCorrecao);
       
       // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
       const jurosPagos = index > 0 
@@ -52,8 +56,9 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         : jurosMesPago;
       
       // Juros relacionados aos reforços para este mês específico
-      const jurosReforcoMesPago = mes.temReforco && index > 0
-        ? (resultado.totalJurosReforcos / Math.floor(detalhes.length / 12)) * (Math.floor(index / 12) + 1) / Math.floor(detalhes.length / 12)
+      const valorReforcoSemCorrecao = resultado.reforcos / Math.floor(resultado.detalhes.length / 12);
+      const jurosReforcoMesPago = mes.temReforco 
+        ? ((valorReforcoSemCorrecao * indiceCub) - valorReforcoSemCorrecao)
         : 0;
       
       // Juros acumulados relacionados aos reforços
@@ -87,7 +92,9 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         lucroLiquido,
         lucroLiquidoComComissao,
         valorizacaoPrevista,
-        temReforco: mes.temReforco
+        temReforco: mes.temReforco,
+        valorCubAtual: mes.valorCubAtual,
+        indiceCubMensal: mes.indiceCubMensal
       });
     });
   }
@@ -145,6 +152,9 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         numeroParcelas={numeroParcelas}
         numeroReforcos={numeroReforcos}
         valorReforcoSemCorrecao={valorReforcoSemCorrecao}
+        cubInicial={cubInicial}
+        cubFinal={cubFinal}
+        indiceCubFinal={indiceCubFinal}
       />
       
       <GraficoResultado 
