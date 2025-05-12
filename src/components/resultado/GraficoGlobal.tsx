@@ -1,76 +1,50 @@
 
 import React from "react";
-import { ResponsiveContainer, CartesianGrid, Legend, Line, XAxis, YAxis, Tooltip, ComposedChart } from "recharts";
-import CustomTooltip, { formatters } from "./CustomTooltip";
 import { DetalhesMesProcessado } from "@/types/simulador";
+import GraficoBase, { SeriesConfig } from "./grafico/GraficoBase";
+import { formatters } from "./CustomTooltip";
 
 interface GraficoGlobalProps {
   detalhesProcessed: DetalhesMesProcessado[];
 }
 
 const GraficoGlobal: React.FC<GraficoGlobalProps> = ({ detalhesProcessed }) => {
+  const series: SeriesConfig[] = [
+    {
+      dataKey: "valorImovel",
+      name: "Valor Imóvel",
+      color: "#9b87f5",
+      type: "line",
+      formatter: formatters.currency
+    },
+    {
+      dataKey: "investido",
+      name: "Total Investido",
+      color: "#7E69AB",
+      type: "line",
+      formatter: formatters.currency
+    },
+    {
+      dataKey: "saldoDevedor",
+      name: "Saldo Devedor",
+      color: "#F97316",
+      type: "line",
+      formatter: formatters.currency
+    },
+    {
+      dataKey: "ganhoReal",
+      name: "Ganho Real",
+      color: "#0EA5E9",
+      type: "line",
+      formatter: formatters.currency
+    }
+  ];
+
   return (
-    <ResponsiveContainer>
-      <ComposedChart data={detalhesProcessed.filter((_,i) => i % 3 === 0)}>
-        <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-        <XAxis dataKey="mes" />
-        <YAxis 
-          tickFormatter={(value) => `${new Intl.NumberFormat('pt-BR', {
-            notation: 'compact',
-            compactDisplay: 'short',
-          }).format(value)}`}
-        />
-        <Tooltip 
-          content={
-            <CustomTooltip 
-              formatters={{
-                valorImovel: formatters.currency,
-                investido: formatters.currency,
-                saldoDevedor: formatters.currency,
-                ganhoReal: formatters.currency
-              }}
-            />
-          } 
-        />
-        <Legend verticalAlign="top" height={36} />
-        <Line 
-          type="monotone" 
-          dataKey="valorImovel" 
-          name="Valor Imóvel" 
-          stroke="#9b87f5" 
-          strokeWidth={2}
-          dot={false}
-          activeDot={{ r: 6 }}
-        />
-        <Line 
-          type="monotone" 
-          dataKey="investido" 
-          name="Total Investido" 
-          stroke="#7E69AB" 
-          strokeWidth={2}
-          dot={false}
-          activeDot={{ r: 6 }}
-        />
-        <Line 
-          type="monotone" 
-          dataKey="saldoDevedor" 
-          name="Saldo Devedor" 
-          stroke="#F97316" 
-          strokeWidth={2}
-          dot={false}
-          activeDot={{ r: 6 }}
-        />
-        <Line 
-          type="monotone" 
-          dataKey="ganhoReal" 
-          name="Ganho Real" 
-          stroke="#0EA5E9" 
-          strokeWidth={2}
-          dot={false}
-          activeDot={{ r: 6 }}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
+    <GraficoBase 
+      data={detalhesProcessed}
+      series={series}
+    />
   );
 };
 

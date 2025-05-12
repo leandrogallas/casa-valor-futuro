@@ -1,53 +1,37 @@
 
 import React from "react";
-import { ResponsiveContainer, CartesianGrid, Legend, Bar, Line, XAxis, YAxis, Tooltip, ComposedChart } from "recharts";
-import CustomTooltip, { formatters } from "./CustomTooltip";
 import { DetalhesMesProcessado } from "@/types/simulador";
+import GraficoBase, { SeriesConfig } from "./grafico/GraficoBase";
+import { formatters } from "./CustomTooltip";
 
 interface GraficoMensalProps {
   detalhesProcessed: DetalhesMesProcessado[];
 }
 
 const GraficoMensal: React.FC<GraficoMensalProps> = ({ detalhesProcessed }) => {
+  const series: SeriesConfig[] = [
+    {
+      dataKey: "ganhoCapitalMensal",
+      name: "Ganho Capital Mensal",
+      color: "#FEC6A1",
+      type: "bar",
+      barSize: 20,
+      formatter: formatters.currency
+    },
+    {
+      dataKey: "ganhoCapitalAcumulado",
+      name: "Ganho Capital Acumulado",
+      color: "#F97316",
+      type: "line",
+      formatter: formatters.currency
+    }
+  ];
+
   return (
-    <ResponsiveContainer>
-      <ComposedChart data={detalhesProcessed.filter((_,i) => i % 3 === 0)}>
-        <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-        <XAxis dataKey="mes" />
-        <YAxis 
-          tickFormatter={(value) => `${new Intl.NumberFormat('pt-BR', {
-            notation: 'compact',
-            compactDisplay: 'short',
-          }).format(value)}`}
-        />
-        <Tooltip 
-          content={
-            <CustomTooltip 
-              formatters={{
-                ganhoCapitalMensal: formatters.currency,
-                ganhoCapitalAcumulado: formatters.currency
-              }}
-            />
-          } 
-        />
-        <Legend verticalAlign="top" height={36} />
-        <Bar 
-          dataKey="ganhoCapitalMensal" 
-          name="Ganho Capital Mensal" 
-          fill="#FEC6A1"
-          barSize={20}
-        />
-        <Line 
-          type="monotone" 
-          dataKey="ganhoCapitalAcumulado" 
-          name="Ganho Capital Acumulado" 
-          stroke="#F97316" 
-          strokeWidth={2}
-          dot={false}
-          activeDot={{ r: 6 }}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
+    <GraficoBase 
+      data={detalhesProcessed}
+      series={series}
+    />
   );
 };
 
