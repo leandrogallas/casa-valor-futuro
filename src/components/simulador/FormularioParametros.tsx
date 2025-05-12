@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Card,
@@ -13,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { DadosSimulacao } from "@/types/simulador";
-import { InfoCircle } from "lucide-react";
+import { Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -112,7 +111,7 @@ const FormularioParametros: React.FC<FormularioParametrosProps> = ({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="cursor-help text-muted-foreground">
-                        <InfoCircle size={14} />
+                        <Info size={14} />
                       </span>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-sm">
@@ -121,7 +120,7 @@ const FormularioParametros: React.FC<FormularioParametrosProps> = ({
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <span className="text-sm font-medium">{formatarPercentual(dados.cubInicial)}</span>
+              <span className="text-sm font-medium">{dados.cubInicial}</span>
             </div>
             <Input
               id="cubInicial"
@@ -141,7 +140,7 @@ const FormularioParametros: React.FC<FormularioParametrosProps> = ({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="cursor-help text-muted-foreground">
-                        <InfoCircle size={14} />
+                        <Info size={14} />
                       </span>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-sm">

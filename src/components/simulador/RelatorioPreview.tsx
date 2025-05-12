@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { FileText, Download, Mail, ChartBar, Table, Settings } from "lucide-react";
 import { format } from "date-fns";
@@ -133,8 +132,8 @@ const RelatorioPreview: React.FC<RelatorioPreviewProps> = ({
                     <p className="font-medium">{(dadosSimulacao.valorizacao * 100).toFixed(2)}%</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Correção Anual</p>
-                    <p className="font-medium">{(dadosSimulacao.correcao * 100).toFixed(2)}%</p>
+                    <p className="text-sm font-medium text-muted-foreground">Variação Anual do CUB</p>
+                    <p className="font-medium">{(dadosSimulacao.variancaoCubAnual * 100).toFixed(2)}%</p>
                   </div>
                 </div>
               </div>

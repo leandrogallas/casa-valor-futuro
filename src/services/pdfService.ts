@@ -1,9 +1,7 @@
-
 import { jsPDF } from "jspdf";
 import { ResultadoSimulacao, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 import { DadosSimulacao, DadosEmpreendimento, DetalhesMesProcessado } from "@/types/simulador";
 import { Chart } from "chart.js/auto";
-import { ArrowUp, ArrowDown } from "lucide-react";
 
 // Configurações de estilo para o PDF
 const styles = {
@@ -328,10 +326,10 @@ export const generatePDF = async (
   doc.setFont(styles.fonts.body, "normal");
   doc.setTextColor(100, 100, 100);
   
-  doc.text("Correção Anual:", col2X, detailY + 30);
+  doc.text("Variação Anual do CUB:", col2X, detailY + 30);
   doc.setFont(styles.fonts.body, "bold");
   doc.setTextColor(60, 60, 60);
-  doc.text(`${(dadosSimulacao.correcao * 100).toFixed(2)}%`, col2X, detailY + 35);
+  doc.text(`${(dadosSimulacao.variancaoCubAnual * 100).toFixed(2)}%`, col2X, detailY + 35);
   
   y += 60;
   
