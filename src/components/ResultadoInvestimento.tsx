@@ -1,3 +1,4 @@
+
 import React from "react";
 import { ResultadoSimulacao, DetalhesMes, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 import CardsResumo from "./resultado/CardsResumo";
@@ -17,25 +18,31 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   const detalhesProcessed = detalhes.map((mes, index) => {
     const mesAnterior = index > 0 ? detalhes[index - 1] : null;
     
-    // Monthly capital gain
+    // Monthly capital gain (valorização do mês)
     const ganhoCapitalMensal = mesAnterior 
       ? mes.valorImovel - mesAnterior.valorImovel 
       : mes.valorImovel - resultado.detalhes[0].valorImovel;
     
-    // Real gain (value - invested - debt)
-    const ganhoReal = mes.valorImovel - mes.investido;
+    // Ganho real é apenas a valorização do imóvel
+    const ganhoReal = mes.valorImovel - resultado.detalhes[0].valorImovel;
     
-    // Net profit (considering closing costs would be about 5%)
-    const lucroLiquido = Math.max(0, mes.valorImovel * 0.95 - mes.investido);
+    // Juros pagos são a parte da parcela que não amortiza a dívida
+    // Se não tivermos o detalhe dos juros, usamos uma estimativa baseada na taxa de correção
+    const jurosPagos = index > 0 ? 
+      (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) : 0;
     
-    // Valorização prevista (accumulated since start)
+    // Lucro líquido é a diferença entre o ganho real (valorização) e os juros pagos
+    const lucroLiquido = ganhoReal - jurosPagos;
+    
+    // Valorização prevista (acumulada desde o início)
     const valorizacaoPrevista = mes.valorImovel - resultado.detalhes[0].valorImovel;
     
     return {
       ...mes,
       ganhoCapitalMensal,
-      ganhoCapitalAcumulado: mes.valorImovel - resultado.detalhes[0].valorImovel,
+      ganhoCapitalAcumulado: ganhoReal, // Mesmo que ganhoReal
       ganhoReal,
+      jurosPagos,
       lucroLiquido,
       valorizacaoPrevista
     } as DetalhesMesProcessado;

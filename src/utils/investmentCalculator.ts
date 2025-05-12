@@ -15,6 +15,7 @@ export interface ResultadoSimulacao {
   valorImovel: number;
   lucro: number;
   retornoPercentual: number;
+  taxaCorrecao: number; // Nova propriedade para ser usada no cálculo dos juros
   detalhes: DetalhesMes[];
 }
 
@@ -151,6 +152,7 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
     valorImovel: parseFloat(valorImovelFinal.toFixed(2)),
     lucro: parseFloat(lucro.toFixed(2)),
     retornoPercentual: parseFloat(retornoPercentual.toFixed(2)),
+    taxaCorrecao: correcao, // Adicionando a taxa de correção aqui
     detalhes
   };
 }

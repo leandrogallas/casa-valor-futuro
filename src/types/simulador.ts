@@ -17,6 +17,7 @@ export interface DetalhesMesProcessado extends DetalhesMes {
   ganhoCapitalMensal: number;
   ganhoCapitalAcumulado: number;
   ganhoReal: number;
+  jurosPagos: number;
   lucroLiquido: number;
   valorizacaoPrevista: number;
 }
