@@ -1,6 +1,6 @@
 
 import React from "react";
-import { formatarPercentual } from "@/utils/investmentCalculator";
+import { formatarPercentual, ResultadoSimulacao } from "@/utils/investmentCalculator";
 import PrimaryMetrics from "./cards/PrimaryMetrics";
 import DetailedMetrics from "./cards/DetailedMetrics";
 import ExtraMetrics from "./cards/ExtraMetrics";
@@ -14,8 +14,11 @@ interface CardsResumoProps {
   latestData: DetalhesMesProcessado;
   meses: number;
   totalJurosPagos: number;
+  totalJurosParcelas: number;
+  totalJurosReforcos: number;
   valorImovelMaisJuros: number;
   valorCompra: number;
+  resultado: ResultadoSimulacao;
 }
 
 const CardsResumo: React.FC<CardsResumoProps> = ({ 
@@ -26,8 +29,11 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
   latestData,
   meses,
   totalJurosPagos,
+  totalJurosParcelas,
+  totalJurosReforcos,
   valorImovelMaisJuros,
-  valorCompra
+  valorCompra,
+  resultado
 }) => {
   // Cálculo da valorização mensal em percentual
   const valorizacaoMensalPercent = retornoPercentual / meses;
@@ -46,13 +52,20 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
       />
 
       {/* Detailed Metrics */}
-      <DetailedMetrics latestData={latestData} />
+      <DetailedMetrics 
+        latestData={latestData} 
+        totalEntrada={resultado.totalEntrada}
+        totalParcelas={resultado.totalParcelas}
+        totalReforcos={resultado.totalReforcos}
+      />
 
       {/* Extra Metrics: Valorização Mensal, Juros Pagos, e Valor Imóvel + Juros */}
       <ExtraMetrics 
         valorizacaoMensalPercent={valorizacaoMensalPercent}
         valorizacaoMensalReais={valorizacaoMensalReais}
         totalJurosPagos={totalJurosPagos}
+        totalJurosParcelas={totalJurosParcelas}
+        totalJurosReforcos={totalJurosReforcos}
         valorImovelMaisJuros={valorImovelMaisJuros}
         valorCompra={valorCompra}
       />

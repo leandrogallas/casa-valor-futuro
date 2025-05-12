@@ -12,7 +12,16 @@ interface ResultadoInvestimentoProps {
 const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado }) => {
   if (!resultado) return null;
 
-  const { totalInvestido, valorImovel, lucro, retornoPercentual, detalhes } = resultado;
+  const { 
+    totalInvestido, 
+    valorImovel, 
+    lucro, 
+    retornoPercentual, 
+    detalhes, 
+    totalJurosParcelas, 
+    totalJurosReforcos, 
+    valorCompra 
+  } = resultado;
 
   // Calculate additional metrics for each month in a way that avoids circular references
   const detalhesProcessed: DetalhesMesProcessado[] = [];
@@ -40,8 +49,18 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         ? detalhesProcessed[index - 1].jurosPagos + jurosMesPago 
         : jurosMesPago;
       
-      // Lucro líquido é a diferença entre o ganho real (valorização) e os juros pagos
-      const lucroLiquido = ganhoReal - jurosPagos;
+      // Juros relacionados aos reforços para este mês específico
+      const jurosReforcoMesPago = mes.temReforco && index > 0
+        ? (resultado.totalJurosReforcos / Math.floor(detalhes.length / 12)) * (Math.floor(index / 12) + 1) / Math.floor(detalhes.length / 12)
+        : 0;
+      
+      // Juros acumulados relacionados aos reforços
+      const jurosReforcosPagos = index > 0
+        ? detalhesProcessed[index - 1].jurosReforcosPagos + (mes.temReforco ? jurosReforcoMesPago : 0)
+        : jurosReforcoMesPago;
+      
+      // Lucro líquido é a diferença entre o ganho real (valorização) e os juros pagos (parcelas + reforços)
+      const lucroLiquido = ganhoReal - jurosPagos - jurosReforcosPagos;
       
       // Valorização prevista (acumulada desde o início)
       const valorizacaoPrevista = mes.valorImovel - detalhes[0].valorImovel;
@@ -52,9 +71,12 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         ganhoCapitalAcumulado: ganhoReal, // Mesmo que ganhoReal
         ganhoReal,
         jurosPagos,
-        jurosMesPago, // Adicionando o juro mensal individual
+        jurosMesPago,
+        jurosReforcosPagos,
+        jurosReforcoMesPago,
         lucroLiquido,
-        valorizacaoPrevista
+        valorizacaoPrevista,
+        temReforco: mes.temReforco
       });
     });
   }
@@ -65,16 +87,14 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Only proceed if we have processed data
   if (!latestData) return null;
   
-  // Calculate the sum of all interest paid
-  const totalJurosPagos = latestData.jurosPagos; // Usamos o valor acumulado do último mês
+  // Calculate the sum of all interest paid (parcelas + reforços)
+  const totalJurosPagos = totalJurosParcelas + totalJurosReforcos;
   
   // Get the valor compra, using the initial value of the property or the first month's value as fallback
-  const valorCompra = 'valorCompra' in resultado 
-    ? resultado.valorCompra 
-    : detalhes[0].valorImovel;
+  const valorCompraFinal = valorCompra || (detalhes && detalhes.length > 0 ? detalhes[0].valorImovel : 0);
   
   // Calculate the sum of property purchase price and total interest paid
-  const valorImovelMaisJuros = valorCompra + totalJurosPagos;
+  const valorImovelMaisJuros = valorCompraFinal + totalJurosPagos;
   
   // Get data for specific years to display in the table (yearly increments)
   const yearlyData = detalhesProcessed.filter(item => item.mes % 12 === 0 || item.mes === 1 || item.mes === detalhesProcessed.length);
@@ -91,8 +111,11 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         latestData={latestData}
         meses={detalhes.length}
         totalJurosPagos={totalJurosPagos}
+        totalJurosParcelas={totalJurosParcelas}
+        totalJurosReforcos={totalJurosReforcos}
         valorImovelMaisJuros={valorImovelMaisJuros}
-        valorCompra={valorCompra}
+        valorCompra={valorCompraFinal}
+        resultado={resultado}
       />
       
       <GraficoResultado 

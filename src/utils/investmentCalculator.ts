@@ -17,6 +17,11 @@ export interface ResultadoSimulacao {
   retornoPercentual: number;
   taxaCorrecao: number;
   valorCompra: number;
+  totalEntrada: number;
+  totalParcelas: number;
+  totalReforcos: number;
+  totalJurosParcelas: number;
+  totalJurosReforcos: number;
   detalhes: DetalhesMes[];
 }
 
@@ -28,6 +33,7 @@ export interface DetalhesMes {
   parcelasPagas: number;
   reforcosPagos: number;
   parcelaMensal: number; // Valor da parcela mensal atualizada
+  temReforco: boolean; // Indica se este mês tem reforço
 }
 
 export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoSimulacao {
@@ -61,6 +67,8 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
   let parcelasPagas = 0;
   let reforcosPagos = 0;
   let saldoDevedor = saldoDevedorInicial;
+  let jurosParcelas = 0; // Juros acumulados sobre as parcelas
+  let jurosReforcos = 0; // Juros acumulados sobre os reforços
   let detalhes: DetalhesMes[] = [];
   
   // Valor inicial do imóvel
@@ -98,9 +106,21 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
     // Adicionar a parcela mensal ao total investido
     valorInvestido += parcelaMensalAtual;
     parcelasPagas += parcelaMensalAtual;
+    jurosParcelas += jurosMes; // Adicionar os juros do mês ao acumulado de juros das parcelas
+    
+    // Flag para indicar se este mês tem reforço
+    let temReforcoNesteMes = false;
+    let jurosReforcoMes = 0;
     
     // Aplicar reforço anual ao final de cada ano com o valor corrigido
     if (i % 12 === 0 && i / 12 <= numAnos) {
+      temReforcoNesteMes = true;
+      
+      // Calcular os juros aplicáveis sobre o reforço (proporcional à correção aplicada)
+      const jurosReforco = reforcoAnualAtual - reforcoAnualInicial * Math.pow(1 + correcao, Math.floor(i/12) - 1);
+      jurosReforcoMes = jurosReforco;
+      jurosReforcos += jurosReforco;
+      
       // Aplicar o reforço ao saldo devedor
       saldoDevedor = saldoDevedor - reforcoAnualAtual;
       valorInvestido += reforcoAnualAtual;
@@ -119,7 +139,8 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
       saldoDevedor: parseFloat(Math.max(0, saldoDevedor).toFixed(2)),
       parcelasPagas: parseFloat(parcelasPagas.toFixed(2)),
       reforcosPagos: parseFloat(reforcosPagos.toFixed(2)),
-      parcelaMensal: parseFloat(parcelaMensalAtual.toFixed(2))
+      parcelaMensal: parseFloat(parcelaMensalAtual.toFixed(2)),
+      temReforco: temReforcoNesteMes
     });
     
     // Ajuste no último mês para garantir saldo devedor zero
@@ -157,6 +178,11 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
     retornoPercentual: parseFloat(retornoPercentual.toFixed(2)),
     taxaCorrecao: correcao,
     valorCompra: valorCompra,
+    totalEntrada: entrada,
+    totalParcelas: parseFloat(parcelasPagas.toFixed(2)),
+    totalReforcos: parseFloat(reforcosPagos.toFixed(2)),
+    totalJurosParcelas: parseFloat(jurosParcelas.toFixed(2)),
+    totalJurosReforcos: parseFloat(jurosReforcos.toFixed(2)),
     detalhes
   };
 }

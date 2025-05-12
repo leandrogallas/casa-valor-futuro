@@ -19,7 +19,9 @@ export interface DetalhesMesProcessado extends DetalhesMes {
   ganhoReal: number;
   jurosPagos: number;
   jurosMesPago: number;  // Juros pagos naquele mês específico
+  jurosReforcosPagos: number; // Juros pagos relacionados aos reforços
+  jurosReforcoMesPago: number; // Juros dos reforços pagos naquele mês específico
   lucroLiquido: number;
   valorizacaoPrevista: number;
-  // Removing optional marker since it's required in the base interface
+  temReforco: boolean; // Indica se neste mês houve pagamento de reforço
 }
