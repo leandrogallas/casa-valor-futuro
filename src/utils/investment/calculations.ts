@@ -1,4 +1,3 @@
-
 // Core calculation functions for investment simulation
 import { DadosSimulacao, DetalhesMes, ResultadoSimulacao } from './types';
 
@@ -153,6 +152,7 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
     totalReforcos: parseFloat(reforcosPagos.toFixed(2)),
     totalJurosParcelas: parseFloat(jurosParcelas.toFixed(2)),
     totalJurosReforcos: parseFloat(jurosReforcos.toFixed(2)),
-    detalhes
+    detalhes,
+    reforcos: reforcos // Add the original reforcos value to the result
   };
 }

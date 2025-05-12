@@ -24,10 +24,10 @@ const NegocioSection: React.FC<NegocioSectionProps> = ({
   numeroReforcos,
   valorReforcoSemCorrecao
 }) => {
-  // Valor total das parcelas sem correção - Using the total principal amount to be paid in parcels
+  // Valor total das parcelas sem correção - Total principal amount divided by number of months multiplied by number of months
   const valorTotalParcelas = valorParcelaSemCorrecao * numeroParcelas;
   
-  // Valor total dos reforços sem correção - Using the total reinforcement amount
+  // Valor total dos reforços sem correção - Original reinforcement amount
   const valorTotalReforcos = valorReforcoSemCorrecao * numeroReforcos;
 
   return (

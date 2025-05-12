@@ -37,4 +37,5 @@ export interface ResultadoSimulacao {
   totalJurosReforcos: number;
   valorizacao: number; // Adding the valorizacao property to fix the build error
   detalhes: DetalhesMes[];
+  reforcos: number; // Original reforcos value from input data (uncorrected)
 }

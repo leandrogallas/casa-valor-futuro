@@ -118,8 +118,8 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   const numeroReforcos = Math.floor(detalhes.length / 12);
   
   // FIXED CALCULATION: Valor do reforço sem correção 
-  // This should be the total reinforcement amount divided by number of reinforcements
-  const valorReforcoSemCorrecao = numeroReforcos > 0 ? resultado.totalReforcos / numeroReforcos : 0;
+  // This should be the original total reinforcement amount divided by number of reinforcements (years)
+  const valorReforcoSemCorrecao = numeroReforcos > 0 ? resultado.reforcos / numeroReforcos : 0;
   
   // Get data for specific years to display in the table (yearly increments)
   const yearlyData = detalhesProcessed.filter(item => item.mes % 12 === 0 || item.mes === 1 || item.mes === detalhesProcessed.length);
