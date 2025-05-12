@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowUp, ArrowDown, DollarSign, Calendar, Calculator, TrendingUp, PieChart, Percent } from "lucide-react";
@@ -12,6 +11,8 @@ interface CardsResumoProps {
   latestData: any;
   meses: number;
   totalJurosPagos: number;
+  valorImovelMaisJuros: number;
+  valorCompra: number;
 }
 
 const CardsResumo: React.FC<CardsResumoProps> = ({ 
@@ -21,7 +22,9 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
   retornoPercentual,
   latestData,
   meses,
-  totalJurosPagos
+  totalJurosPagos,
+  valorImovelMaisJuros,
+  valorCompra
 }) => {
   const isLucro = lucro > 0;
   
@@ -155,8 +158,8 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
         </Card>
       </div>
 
-      {/* Novos Cards de Valorização Mensal e Juros Pagos */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+      {/* Novos Cards de Valorização Mensal, Juros Pagos, e Valor Imóvel + Juros */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
         <Card className="bg-gradient-to-br from-cyan-50 to-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -193,6 +196,24 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
                 <h3 className="text-2xl font-bold">{formatarMoeda(totalJurosPagos)}</h3>
               </div>
               <div className="bg-red-500 p-2 rounded-full text-white">
+                <Calculator size={20} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* New Card: Valor Imóvel + Juros */}
+        <Card className="bg-gradient-to-br from-orange-50 to-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Valor Imóvel + Juros</p>
+                <h3 className="text-2xl font-bold">{formatarMoeda(valorImovelMaisJuros)}</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  ({formatarMoeda(valorCompra)} + {formatarMoeda(totalJurosPagos)})
+                </p>
+              </div>
+              <div className="bg-orange-500 p-2 rounded-full text-white">
                 <Calculator size={20} />
               </div>
             </div>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ResultadoSimulacao, DetalhesMes, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 import CardsResumo from "./resultado/CardsResumo";
@@ -54,6 +53,9 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Calculate the sum of all interest paid
   const totalJurosPagos = detalhesProcessed.reduce((total, mes) => total + mes.jurosPagos, 0);
   
+  // Calculate the sum of property purchase price and total interest paid
+  const valorImovelMaisJuros = resultado.valorCompra + totalJurosPagos;
+  
   // Get data for specific years to display in the table (yearly increments)
   const yearlyData = detalhesProcessed.filter(item => item.mes % 12 === 0 || item.mes === 1 || item.mes === detalhesProcessed.length);
 
@@ -69,6 +71,8 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         latestData={latestData}
         meses={detalhes.length}
         totalJurosPagos={totalJurosPagos}
+        valorImovelMaisJuros={valorImovelMaisJuros}
+        valorCompra={resultado.valorCompra}
       />
       
       <GraficoResultado 
