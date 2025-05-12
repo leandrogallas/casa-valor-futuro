@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DetalhesMes, ResultadoSimulacao, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, Bar, ComposedChart } from "recharts";
-import { ArrowUp, ArrowDown, DollarSign, Calendar, Calculator, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowUp, ArrowDown, DollarSign, Calendar, Calculator, TrendingUp, TrendingDown, PieChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ResultadoInvestimentoProps {
@@ -34,12 +34,16 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
     // Net profit (considering closing costs would be about 5%)
     const lucroLiquido = Math.max(0, mes.valorImovel * 0.95 - mes.investido);
     
+    // Valorização prevista (accumulated since start)
+    const valorizacaoPrevista = mes.valorImovel - resultado.detalhes[0].valorImovel;
+    
     return {
       ...mes,
       ganhoCapitalMensal,
       ganhoCapitalAcumulado: mes.valorImovel - resultado.detalhes[0].valorImovel,
       ganhoReal,
-      lucroLiquido
+      lucroLiquido,
+      valorizacaoPrevista
     };
   });
 
@@ -127,7 +131,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       </div>
 
       {/* Additional metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-blue-50 to-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -137,6 +141,20 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
               </div>
               <div className="bg-blue-500 p-2 rounded-full text-white">
                 <Calculator size={20} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-purple-50 to-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Valorização Prevista</p>
+                <h3 className="text-2xl font-bold">{formatarMoeda(latestData.valorizacaoPrevista)}</h3>
+              </div>
+              <div className="bg-purple-500 p-2 rounded-full text-white">
+                <PieChart size={20} />
               </div>
             </div>
           </CardContent>
@@ -156,14 +174,14 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-white">
+        <Card className="bg-gradient-to-br from-green-50 to-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Ganho Real (Líquido)</p>
                 <h3 className="text-2xl font-bold">{formatarMoeda(latestData.lucroLiquido)}</h3>
               </div>
-              <div className="bg-purple-500 p-2 rounded-full text-white">
+              <div className="bg-green-500 p-2 rounded-full text-white">
                 <DollarSign size={20} />
               </div>
             </div>
@@ -293,6 +311,15 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
                       dot={false}
                       activeDot={{ r: 6 }}
                     />
+                    <Line 
+                      type="monotone" 
+                      dataKey="valorizacaoPrevista" 
+                      name="Valorização Prevista" 
+                      stroke="#8884d8" 
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 6 }}
+                    />
                   </ComposedChart>
                 )}
               </ResponsiveContainer>
@@ -308,6 +335,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
                         <th className="py-2 px-4 text-left font-medium">Total Investido</th>
                         <th className="py-2 px-4 text-left font-medium">Valor Imóvel</th>
                         <th className="py-2 px-4 text-left font-medium">Saldo Devedor</th>
+                        <th className="py-2 px-4 text-left font-medium">Valorização Prevista</th>
                         <th className="py-2 px-4 text-left font-medium">Ganho Cap. Mensal</th>
                         <th className="py-2 px-4 text-left font-medium">Ganho Cap. Acum.</th>
                         <th className="py-2 px-4 text-left font-medium">Lucro Líquido</th>
@@ -320,6 +348,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
                           <td className="py-2 px-4 border-b">{formatarMoeda(mes.investido)}</td>
                           <td className="py-2 px-4 border-b">{formatarMoeda(mes.valorImovel)}</td>
                           <td className="py-2 px-4 border-b">{formatarMoeda(mes.saldoDevedor)}</td>
+                          <td className="py-2 px-4 border-b">{formatarMoeda(mes.valorizacaoPrevista)}</td>
                           <td className="py-2 px-4 border-b">{formatarMoeda(mes.ganhoCapitalMensal)}</td>
                           <td className="py-2 px-4 border-b">{formatarMoeda(mes.ganhoCapitalAcumulado)}</td>
                           <td className="py-2 px-4 border-b">{formatarMoeda(mes.lucroLiquido)}</td>
