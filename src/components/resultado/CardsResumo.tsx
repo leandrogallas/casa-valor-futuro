@@ -49,11 +49,15 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
   cubFinal,
   indiceCubFinal
 }) => {
-  // Cálculo da valorização mensal em percentual
-  const valorizacaoMensalPercent = retornoPercentual / meses;
+  // Correção do cálculo da valorização mensal em percentual
+  // Calculamos a taxa mensal equivalente a partir da taxa anual
+  const valorizacaoAnual = resultado.valorizacao;
+  const valorizacaoMensalPercent = Math.pow(1 + valorizacaoAnual, 1/12) - 1;
   
   // Cálculo da valorização mensal em R$
-  const valorizacaoMensalReais = lucro / meses;
+  // Usa o valor total da valorização dividido pelo número de meses
+  const ganhoCapitalTotal = valorImovel - valorCompra;
+  const valorizacaoMensalReais = ganhoCapitalTotal / meses;
 
   return (
     <div className="space-y-8">
@@ -74,7 +78,7 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
         totalJurosReforcos={totalJurosReforcos}
         totalJurosPagos={totalJurosPagos}
         valorCompra={valorCompra}
-        totalInvestido={totalInvestido} // Pass totalInvestido to CustosSection
+        totalInvestido={totalInvestido}
         cubInicial={cubInicial}
         cubFinal={cubFinal}
         indiceCubFinal={indiceCubFinal}

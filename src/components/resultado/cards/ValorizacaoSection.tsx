@@ -3,7 +3,7 @@ import React from "react";
 import { TrendingUp, PieChart, DollarSign, Percent, ArrowUp, ArrowDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MetricCard from "./MetricCard";
-import { formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
+import { formatarMoeda, formatarPercentual } from "@/utils/investment/formatters";
 import { DetalhesMesProcessado } from "@/types/simulador";
 
 interface ValorizacaoSectionProps {
@@ -30,6 +30,15 @@ const ValorizacaoSection: React.FC<ValorizacaoSectionProps> = ({
   // Calcular comissão de 5%
   const comissao = valorImovel * 0.05;
   const lucroComComissao = latestData.lucroLiquidoComComissao;
+
+  // Correção do cálculo da valorização mensal
+  // Calculamos a taxa mensal equivalente a partir da taxa anual
+  const valorizacaoAnual = resultado.valorizacao; // Ex: 0.12 para 12%
+  const valorizacaoMensalCorrigida = Math.pow(1 + valorizacaoAnual, 1/12) - 1; // Taxa equivalente mensal
+  
+  // Formatando para exibição
+  const valorizacaoMensalPercentFormatada = formatarPercentual(valorizacaoMensalCorrigida * 100);
+  const valorizacaoAnualPercentFormatada = formatarPercentual(valorizacaoAnual * 100);
   
   return (
     <Card className="shadow-md border-t-4 border-t-green-500">
@@ -84,12 +93,12 @@ const ValorizacaoSection: React.FC<ValorizacaoSectionProps> = ({
           
           <MetricCard
             title="Valorização Mensal"
-            value={formatarPercentual(valorizacaoMensalPercent)}
+            value={valorizacaoMensalPercentFormatada}
             icon={<div className="bg-cyan-500 p-2 rounded-full text-white">
               <Percent size={20} />
             </div>}
             bgColor="from-cyan-50 to-white"
-            subtitle={`${formatarPercentual(resultado.valorizacao * 100)} ao ano`}
+            subtitle={`${valorizacaoAnualPercentFormatada} ao ano`}
           />
           
           <MetricCard
