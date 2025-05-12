@@ -65,7 +65,7 @@ const CustosSection: React.FC<CustosSectionProps> = ({
               <Building size={20} />
             </div>}
             bgColor="from-rose-50 to-white"
-            subtitle={`Valor de compra (${formatarMoeda(valorCompra)}) + Total de juros`}
+            subtitle={`Valor inicial (${formatarMoeda(valorCompra)}) + Total de juros`}
           />
         </div>
       </CardContent>

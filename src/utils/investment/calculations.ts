@@ -28,8 +28,6 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
   let parcelasPagas = 0;
   let reforcosPagos = 0;
   let saldoDevedor = saldoDevedorInicial;
-  let jurosParcelas = 0; // Juros acumulados sobre as parcelas
-  let jurosReforcos = 0; // Juros acumulados sobre os reforços
   let detalhes: DetalhesMes[] = [];
   
   // Valor inicial do imóvel
@@ -46,19 +44,9 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
     // Correção anual da parcela e do reforço (a cada 12 meses)
     // No primeiro mês de cada ano (exceto o primeiro ano), aplicamos a correção
     if (i > 1 && (i - 1) % 12 === 0) {
-      // Calcular juros sobre a parcela com base no índice de correção
-      const jurosSobreParcela = parcelaMensalAtual * taxaMensal * 12; // Juros para um ano
-      jurosParcelas += jurosSobreParcela;
-      
       // Aplicar a correção anual à parcela e ao reforço
       parcelaMensalAtual = parcelaMensalAtual * (1 + correcao);
       reforcoAnualAtual = reforcoAnualAtual * (1 + correcao);
-    }
-    
-    // Para o primeiro mês de cada ano, calcular os juros sobre o reforço
-    if (i % 12 === 0 && i / 12 <= numAnos) {
-      const jurosSobreReforco = reforcoAnualAtual * taxaMensal; // Juros de um mês sobre o reforço
-      jurosReforcos += jurosSobreReforco;
     }
     
     // Atualizar o saldo devedor
@@ -125,13 +113,11 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
     }
   }
 
-  // Calcular juros das parcelas mensais simples (0.5% ao mês)
-  // Para cada mês multiplicamos a parcela inicial pela taxa mensal
-  const jurosParcelasSimples = parcelaMensalInicial * taxaMensal * meses;
+  // CORREÇÃO: Cálculo dos juros das parcelas como valor da parcela * (taxa anual / 12) * período total
+  const jurosParcelasTotal = parcelaMensalInicial * (correcao / 12) * meses;
   
-  // Calcular juros dos reforços anuais simples (6% ao ano)
-  // Para cada reforço anual multiplicamos o reforço inicial pela taxa anual 
-  const jurosReforcosSimples = reforcoAnualInicial * correcao * numAnos;
+  // Cálculo dos juros dos reforços como taxa anual sobre cada reforço anual
+  const jurosReforcosTotal = reforcoAnualInicial * correcao * numAnos;
 
   // Cálculo final dos resultados
   const valorImovelFinal = valorInicialImovel * Math.pow(1 + valorizacao, meses / 12);
@@ -150,8 +136,8 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
     totalEntrada: entrada,
     totalParcelas: parseFloat(parcelasPagas.toFixed(2)),
     totalReforcos: parseFloat(reforcosPagos.toFixed(2)),
-    totalJurosParcelas: parseFloat(jurosParcelasSimples.toFixed(2)),
-    totalJurosReforcos: parseFloat(jurosReforcosSimples.toFixed(2)),
+    totalJurosParcelas: parseFloat(jurosParcelasTotal.toFixed(2)),
+    totalJurosReforcos: parseFloat(jurosReforcosTotal.toFixed(2)),
     detalhes,
     reforcos: reforcos
   };
