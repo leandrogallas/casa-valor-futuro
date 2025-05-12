@@ -1,31 +1,11 @@
 
 import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
+import FormularioParametros from "./simulador/FormularioParametros";
+import TelaInicial from "./simulador/TelaInicial";
 import ResultadoInvestimento from "./ResultadoInvestimento";
 import { calcularSimulacaoInvestimento, ResultadoSimulacao } from "@/utils/investmentCalculator";
 import { toast } from "@/components/ui/use-toast";
-
-interface DadosSimulacao {
-  valorMercado: number;
-  valorCompra: number;
-  valorizacao: number;
-  correcao: number;
-  entrada: number;
-  parcelas: number;
-  reforcos: number;
-  meses: number;
-}
+import { DadosSimulacao } from "@/types/simulador";
 
 const SimuladorInvestimento: React.FC = () => {
   const [dados, setDados] = useState<DadosSimulacao>({
@@ -70,192 +50,22 @@ const SimuladorInvestimento: React.FC = () => {
     }
   };
 
-  const handleInputChange = (campo: keyof DadosSimulacao) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-    setDados({ ...dados, [campo]: valor });
-  };
-
-  const handleSliderChange = (campo: keyof DadosSimulacao) => (valor: number[]) => {
-    setDados({ ...dados, [campo]: valor[0] });
-  };
-
-  const formatarPercentual = (valor: number): string => {
-    return `${(valor * 100).toFixed(2)}%`;
-  };
-
   return (
     <div className="container py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
-          <Card className="border-investment-primary/20 shadow-lg">
-            <CardHeader>
-              <CardTitle>Parâmetros da Simulação</CardTitle>
-              <CardDescription>
-                Ajuste os valores para simular seu investimento imobiliário
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm text-muted-foreground">Valores do Imóvel</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="valorMercado">Valor de Mercado (R$)</Label>
-                  <Input
-                    id="valorMercado"
-                    type="number"
-                    value={dados.valorMercado}
-                    onChange={handleInputChange('valorMercado')}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="valorCompra">Valor de Compra (R$)</Label>
-                  <Input
-                    id="valorCompra"
-                    type="number"
-                    value={dados.valorCompra}
-                    onChange={handleInputChange('valorCompra')}
-                  />
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm text-muted-foreground">Taxas</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="valorizacao">Valorização Anual</Label>
-                    <span className="text-sm font-medium">{formatarPercentual(dados.valorizacao)}</span>
-                  </div>
-                  <Slider
-                    id="valorizacao"
-                    min={0}
-                    max={0.25}
-                    step={0.01}
-                    value={[dados.valorizacao]}
-                    onValueChange={handleSliderChange('valorizacao')}
-                  />
-                  <Input
-                    type="number"
-                    value={dados.valorizacao}
-                    onChange={handleInputChange('valorizacao')}
-                    step="0.01"
-                    className="mt-1"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="correcao">Correção Anual das Parcelas</Label>
-                    <span className="text-sm font-medium">{formatarPercentual(dados.correcao)}</span>
-                  </div>
-                  <Slider
-                    id="correcao"
-                    min={0}
-                    max={0.15}
-                    step={0.01}
-                    value={[dados.correcao]}
-                    onValueChange={handleSliderChange('correcao')}
-                  />
-                  <Input
-                    type="number"
-                    value={dados.correcao}
-                    onChange={handleInputChange('correcao')}
-                    step="0.01"
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm text-muted-foreground">Valores do Investimento</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="entrada">Entrada (R$)</Label>
-                  <Input
-                    id="entrada"
-                    type="number"
-                    value={dados.entrada}
-                    onChange={handleInputChange('entrada')}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="parcelas">Total em Parcelas (R$)</Label>
-                  <Input
-                    id="parcelas"
-                    type="number"
-                    value={dados.parcelas}
-                    onChange={handleInputChange('parcelas')}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="reforcos">Total em Reforços Anuais (R$)</Label>
-                  <Input
-                    id="reforcos"
-                    type="number"
-                    value={dados.reforcos}
-                    onChange={handleInputChange('reforcos')}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="meses">Período (meses)</Label>
-                  <Input
-                    id="meses"
-                    type="number"
-                    value={dados.meses}
-                    onChange={handleInputChange('meses')}
-                  />
-                </div>
-              </div>
-              
-              <Button 
-                onClick={calcularSimulacao} 
-                className="w-full mt-4 bg-investment-primary hover:bg-investment-secondary"
-              >
-                Calcular Simulação
-              </Button>
-            </CardContent>
-          </Card>
+          <FormularioParametros 
+            dados={dados} 
+            onDadosChange={setDados} 
+            onCalcular={calcularSimulacao} 
+          />
         </div>
         
         <div className="lg:col-span-2">
           {resultado ? (
             <ResultadoInvestimento resultado={resultado} />
           ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center p-8 border border-dashed border-gray-300 rounded-lg bg-gray-50 w-full">
-                <h3 className="text-xl font-medium text-gray-600 mb-2">Simulador de Investimento Imobiliário</h3>
-                <p className="text-gray-500">
-                  Configure os parâmetros e clique em "Calcular Simulação" 
-                  para visualizar os resultados detalhados do seu investimento.
-                </p>
-                <div className="mt-6 space-y-4 text-sm text-left max-w-lg mx-auto">
-                  <div className="p-4 bg-white rounded shadow-sm">
-                    <h4 className="font-medium text-investment-dark">Como funciona:</h4>
-                    <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-600">
-                      <li>Defina o valor de mercado e de compra do imóvel</li>
-                      <li>Ajuste as taxas de valorização e correção anual</li>
-                      <li>Configure os valores de entrada, parcelas e reforços</li>
-                      <li>Determine o período da simulação em meses</li>
-                    </ul>
-                  </div>
-                  <div className="p-4 bg-white rounded shadow-sm">
-                    <h4 className="font-medium text-investment-dark">O que a simulação mostra:</h4>
-                    <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-600">
-                      <li>Evolução do valor do imóvel ao longo do tempo</li>
-                      <li>Saldo devedor e total investido</li>
-                      <li>Ganho de capital mensal e acumulado</li>
-                      <li>Ganho real e lucro líquido do investimento</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <TelaInicial />
           )}
         </div>
       </div>
