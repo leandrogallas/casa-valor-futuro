@@ -17,57 +17,61 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Calculate additional metrics for each month in a way that avoids circular references
   const detalhesProcessed: DetalhesMesProcessado[] = [];
   
-  detalhes.forEach((mes, index) => {
-    const mesAnterior = index > 0 ? detalhes[index - 1] : null;
-    
-    // Monthly capital gain (valorização do mês)
-    const ganhoCapitalMensal = mesAnterior 
-      ? mes.valorImovel - mesAnterior.valorImovel 
-      : mes.valorImovel - resultado.detalhes[0].valorImovel;
-    
-    // Ganho real é apenas a valorização do imóvel
-    const ganhoReal = mes.valorImovel - resultado.detalhes[0].valorImovel;
-    
-    // Juros pagos são a parte da parcela que não amortiza a dívida
-    // Calculamos o juro com base na taxa sobre o saldo devedor anterior
-    const jurosMesPago = index > 0 
-      ? (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) 
-      : 0;
-    
-    // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
-    // Use the previously calculated item in detalhesProcessed array
-    const jurosPagos = index > 0 
-      ? detalhesProcessed[index - 1].jurosPagos + jurosMesPago 
-      : jurosMesPago;
-    
-    // Lucro líquido é a diferença entre o ganho real (valorização) e os juros pagos
-    const lucroLiquido = ganhoReal - jurosPagos;
-    
-    // Valorização prevista (acumulada desde o início)
-    const valorizacaoPrevista = mes.valorImovel - resultado.detalhes[0].valorImovel;
-    
-    detalhesProcessed.push({
-      ...mes,
-      ganhoCapitalMensal,
-      ganhoCapitalAcumulado: ganhoReal, // Mesmo que ganhoReal
-      ganhoReal,
-      jurosPagos,
-      jurosMesPago, // Adicionando o juro mensal individual
-      lucroLiquido,
-      valorizacaoPrevista
+  if (detalhes && detalhes.length > 0) {
+    detalhes.forEach((mes, index) => {
+      const mesAnterior = index > 0 ? detalhes[index - 1] : null;
+      
+      // Monthly capital gain (valorização do mês)
+      const ganhoCapitalMensal = mesAnterior 
+        ? mes.valorImovel - mesAnterior.valorImovel 
+        : mes.valorImovel - detalhes[0].valorImovel;
+      
+      // Ganho real é apenas a valorização do imóvel
+      const ganhoReal = mes.valorImovel - detalhes[0].valorImovel;
+      
+      // Juros pagos são a parte da parcela que não amortiza a dívida
+      // Calculamos o juro com base na taxa sobre o saldo devedor anterior
+      const jurosMesPago = index > 0 
+        ? (mesAnterior.saldoDevedor * (Math.pow(1 + resultado.taxaCorrecao, 1/12) - 1)) 
+        : 0;
+      
+      // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
+      const jurosPagos = index > 0 
+        ? detalhesProcessed[index - 1].jurosPagos + jurosMesPago 
+        : jurosMesPago;
+      
+      // Lucro líquido é a diferença entre o ganho real (valorização) e os juros pagos
+      const lucroLiquido = ganhoReal - jurosPagos;
+      
+      // Valorização prevista (acumulada desde o início)
+      const valorizacaoPrevista = mes.valorImovel - detalhes[0].valorImovel;
+      
+      detalhesProcessed.push({
+        ...mes,
+        ganhoCapitalMensal,
+        ganhoCapitalAcumulado: ganhoReal, // Mesmo que ganhoReal
+        ganhoReal,
+        jurosPagos,
+        jurosMesPago, // Adicionando o juro mensal individual
+        lucroLiquido,
+        valorizacaoPrevista
+      });
     });
-  });
+  }
 
   // Latest data for cards
-  const latestData = detalhesProcessed[detalhesProcessed.length - 1];
+  const latestData = detalhesProcessed.length > 0 ? detalhesProcessed[detalhesProcessed.length - 1] : null;
+  
+  // Only proceed if we have processed data
+  if (!latestData) return null;
   
   // Calculate the sum of all interest paid
-  const totalJurosPagos = latestData.jurosPagos; // Agora usamos o valor acumulado do último mês
+  const totalJurosPagos = latestData.jurosPagos; // Usamos o valor acumulado do último mês
   
   // Get the valor compra, using the initial value of the property or the first month's value as fallback
   const valorCompra = 'valorCompra' in resultado 
     ? resultado.valorCompra 
-    : resultado.detalhes[0].valorImovel;
+    : detalhes[0].valorImovel;
   
   // Calculate the sum of property purchase price and total interest paid
   const valorImovelMaisJuros = valorCompra + totalJurosPagos;

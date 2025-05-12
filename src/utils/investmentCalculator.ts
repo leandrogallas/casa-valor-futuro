@@ -27,7 +27,7 @@ export interface DetalhesMes {
   saldoDevedor: number;
   parcelasPagas: number;
   reforcosPagos: number;
-  parcelaMensal: number; // Adicionado o valor da parcela mensal atualizada
+  parcelaMensal: number; // Valor da parcela mensal atualizada
 }
 
 export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoSimulacao {
@@ -42,20 +42,17 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
   // Cálculo do valor inicial do saldo devedor (preço de compra menos entrada)
   const saldoDevedorInicial = valorCompra - entrada;
   
-  // Cálculo do valor total dos reforços previstos
-  const valorReforcoAnual = numAnos > 0 ? reforcos / numAnos : 0;
+  // Cálculo do valor do reforço anual inicial (sem correção)
+  const reforcoAnualInicial = numAnos > 0 ? reforcos / numAnos : 0;
   
   // Cálculo do valor da parcela mensal inicial (sem correção)
-  // Usaremos o Sistema Price para calcular a parcela inicial
   let parcelaMensalInicial = 0;
   
   if (Math.abs(taxaMensal) < 0.000001) {
     // Se a taxa for praticamente zero, dividimos o valor efetivo igualmente
     parcelaMensalInicial = saldoDevedorInicial / meses;
   } else {
-    // Fórmula do Sistema Price: PMT = PV * [ r * (1+r)^n ] / [ (1+r)^n - 1 ]
-    // Usamos taxa zero para calcular a parcela inicial sem juros
-    const taxaZero = 0;
+    // Fórmula simplificada para o caso de taxa próxima a zero
     parcelaMensalInicial = saldoDevedorInicial / meses;
   }
   
@@ -72,13 +69,17 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
   // A parcela mensal será corrigida anualmente
   let parcelaMensalAtual = parcelaMensalInicial;
   
+  // O valor do reforço anual também será corrigido anualmente
+  let reforcoAnualAtual = reforcoAnualInicial;
+  
   // Processamento mês a mês
   for (let i = 1; i <= meses; i++) {
-    // Correção anual da parcela (a cada 12 meses)
+    // Correção anual da parcela e do reforço (a cada 12 meses)
     // No primeiro mês de cada ano (exceto o primeiro ano), aplicamos a correção
     if (i > 1 && (i - 1) % 12 === 0) {
-      // Aplicar a correção anual à parcela
+      // Aplicar a correção anual à parcela e ao reforço
       parcelaMensalAtual = parcelaMensalAtual * (1 + correcao);
+      reforcoAnualAtual = reforcoAnualAtual * (1 + correcao);
     }
     
     // Calcular juros do mês sobre o saldo devedor atual
@@ -98,12 +99,12 @@ export function calcularSimulacaoInvestimento(dados: InvestmentData): ResultadoS
     valorInvestido += parcelaMensalAtual;
     parcelasPagas += parcelaMensalAtual;
     
-    // Aplicar reforço anual ao final de cada ano
+    // Aplicar reforço anual ao final de cada ano com o valor corrigido
     if (i % 12 === 0 && i / 12 <= numAnos) {
       // Aplicar o reforço ao saldo devedor
-      saldoDevedor = saldoDevedor - valorReforcoAnual;
-      valorInvestido += valorReforcoAnual;
-      reforcosPagos += valorReforcoAnual;
+      saldoDevedor = saldoDevedor - reforcoAnualAtual;
+      valorInvestido += reforcoAnualAtual;
+      reforcosPagos += reforcoAnualAtual;
     }
     
     // Cálculo da valorização do imóvel (taxa mensal calculada a partir da anual)

@@ -10,7 +10,7 @@ export interface DadosSimulacao {
   meses: number;
 }
 
-// Importando DetalhesMes da mesma fonte que a usa
+// Importing DetalhesMes directly rather than referencing it from another import
 import { DetalhesMes } from "@/utils/investmentCalculator";
 
 export interface DetalhesMesProcessado extends DetalhesMes {
@@ -21,5 +21,5 @@ export interface DetalhesMesProcessado extends DetalhesMes {
   jurosMesPago: number;  // Juros pagos naquele mês específico
   lucroLiquido: number;
   valorizacaoPrevista: number;
-  parcelaMensal?: number; // Adicionado para compatibilidade com o novo campo em DetalhesMes
+  // Removing optional marker since it's required in the base interface
 }
