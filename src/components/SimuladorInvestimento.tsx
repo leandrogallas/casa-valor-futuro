@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FormularioParametros from "./simulador/FormularioParametros";
@@ -9,6 +8,7 @@ import { calcularSimulacaoInvestimento, ResultadoSimulacao } from "@/utils/inves
 import { toast } from "@/components/ui/use-toast";
 import { DadosSimulacao, DadosEmpreendimento } from "@/types/simulador";
 import { RelatorioPreview } from "./simulador/RelatorioImports";
+import { generatePDF, sendPDFByEmail } from "@/services/pdfService";
 
 const SimuladorInvestimento: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("simulacao");
@@ -156,7 +156,7 @@ const SimuladorInvestimento: React.FC = () => {
   );
 
   // Funções para geração e envio de PDF
-  function gerarEBaixarPDF() {
+  async function gerarEBaixarPDF() {
     if (!resultado) return;
     
     toast({
@@ -164,17 +164,39 @@ const SimuladorInvestimento: React.FC = () => {
       description: "O PDF está sendo gerado, aguarde o download iniciar."
     });
     
-    // Em uma implementação real, aqui chamaríamos o serviço de geração de PDF
-    // Por enquanto simulamos com um timeout
-    setTimeout(() => {
+    try {
+      // Gerar o PDF usando o serviço
+      const pdfBlob = await generatePDF(resultado, dados, dadosEmpreendimento);
+      
+      // Criar URL para o blob
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      
+      // Criar elemento de link e simular clique para download
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = `relatorio-${dadosEmpreendimento.nomeEmpreendimento || 'investimento'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Limpar a URL do objeto
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 100);
+      
       toast({
         title: "PDF Gerado",
         description: "O PDF foi gerado e baixado com sucesso."
       });
-    }, 1500);
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Ocorreu um erro ao gerar o PDF. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   }
   
-  function gerarEEnviarPDF() {
+  async function gerarEEnviarPDF() {
     if (!resultado || !dadosEmpreendimento.emailCliente) return;
     
     toast({
@@ -182,14 +204,37 @@ const SimuladorInvestimento: React.FC = () => {
       description: `Enviando para ${dadosEmpreendimento.emailCliente}, aguarde...`
     });
     
-    // Em uma implementação real, aqui chamaríamos o serviço de envio de email com o PDF
-    // Por enquanto simulamos com um timeout
-    setTimeout(() => {
+    try {
+      // Gerar o PDF usando o serviço
+      const pdfBlob = await generatePDF(resultado, dados, dadosEmpreendimento);
+      
+      // Enviar o PDF por email
+      const subject = `Simulação de Investimento - ${dadosEmpreendimento.nomeEmpreendimento || 'Novo Empreendimento'}`;
+      const message = dadosEmpreendimento.mensagem || "Segue anexo a simulação do investimento solicitado.";
+      
+      const enviado = await sendPDFByEmail(
+        pdfBlob,
+        dadosEmpreendimento.emailCliente,
+        subject,
+        message
+      );
+      
+      if (enviado) {
+        toast({
+          title: "PDF Enviado",
+          description: `O relatório foi enviado com sucesso para ${dadosEmpreendimento.emailCliente}`
+        });
+      } else {
+        throw new Error("Falha no envio do email");
+      }
+    } catch (error) {
+      console.error("Erro ao enviar PDF:", error);
       toast({
-        title: "PDF Enviado",
-        description: `O relatório foi enviado com sucesso para ${dadosEmpreendimento.emailCliente}`
+        title: "Erro ao enviar PDF",
+        description: "Ocorreu um erro ao enviar o PDF por email. Tente novamente.",
+        variant: "destructive"
       });
-    }, 1500);
+    }
   }
 };
 
