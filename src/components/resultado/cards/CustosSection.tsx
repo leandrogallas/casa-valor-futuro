@@ -35,7 +35,7 @@ const CustosSection: React.FC<CustosSectionProps> = ({
               <Calculator size={20} />
             </div>}
             bgColor="from-red-50 to-white"
-            subtitle={`${formatarPercentual(totalJurosParcelas / totalJurosPagos * 100)} dos juros totais`}
+            subtitle={`${formatarPercentual(totalJurosParcelas / totalJurosPagos * 100)} do total de juros`}
           />
           
           <MetricCard
@@ -45,7 +45,7 @@ const CustosSection: React.FC<CustosSectionProps> = ({
               <Calculator size={20} />
             </div>}
             bgColor="from-orange-50 to-white"
-            subtitle={`${formatarPercentual(totalJurosReforcos / totalJurosPagos * 100)} dos juros totais`}
+            subtitle={`${formatarPercentual(totalJurosReforcos / totalJurosPagos * 100)} do total de juros`}
           />
           
           <MetricCard
@@ -65,7 +65,7 @@ const CustosSection: React.FC<CustosSectionProps> = ({
               <Building size={20} />
             </div>}
             bgColor="from-rose-50 to-white"
-            subtitle={`Compra + Juros`}
+            subtitle={`Valor de compra (${formatarMoeda(valorCompra)}) + Total de juros`}
           />
         </div>
       </CardContent>
