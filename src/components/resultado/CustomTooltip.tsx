@@ -2,12 +2,6 @@
 import React from "react";
 import { TooltipProps } from "recharts";
 import { formatarMoeda } from "@/utils/investmentCalculator";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/components/ui/tooltip";
 
 export type TooltipFormatter = (value: number) => string;
 
