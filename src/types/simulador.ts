@@ -30,6 +30,7 @@ export interface DetalhesMesProcessado extends DetalhesMes {
   jurosReforcosPagos: number; // Juros pagos relacionados aos reforços
   jurosReforcoMesPago: number; // Juros dos reforços pagos naquele mês específico
   lucroLiquido: number;
+  lucroLiquidoComComissao: number; // Lucro líquido após dedução de 5% de comissão
   valorizacaoPrevista: number;
   temReforco: boolean; // Indica se neste mês houve pagamento de reforço
 }

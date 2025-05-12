@@ -20,7 +20,10 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
     detalhes, 
     totalJurosParcelas, 
     totalJurosReforcos, 
-    valorCompra 
+    valorCompra,
+    totalEntrada,
+    totalParcelas,
+    totalReforcos
   } = resultado;
 
   // Calculate additional metrics for each month in a way that avoids circular references
@@ -35,8 +38,8 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         ? mes.valorImovel - mesAnterior.valorImovel 
         : mes.valorImovel - detalhes[0].valorImovel;
       
-      // Ganho real é apenas a valorização do imóvel
-      const ganhoReal = mes.valorImovel - detalhes[0].valorImovel;
+      // Ganho capital é a valorização do imóvel menos o valor de compra
+      const ganhoCapital = mes.valorImovel - valorCompra;
       
       // Juros pagos são a parte da parcela que não amortiza a dívida
       // Calculamos o juro com base na taxa sobre o saldo devedor anterior
@@ -59,8 +62,16 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         ? detalhesProcessed[index - 1].jurosReforcosPagos + (mes.temReforco ? jurosReforcoMesPago : 0)
         : jurosReforcoMesPago;
       
-      // Lucro líquido é a diferença entre o ganho real (valorização) e os juros pagos (parcelas + reforços)
-      const lucroLiquido = ganhoReal - jurosPagos - jurosReforcosPagos;
+      // Ganho real é a valorização menos os juros pagos
+      const ganhoReal = ganhoCapital - jurosPagos - jurosReforcosPagos;
+      
+      // Lucro líquido é o ganho real
+      const lucroLiquido = ganhoReal;
+      
+      // Lucro líquido após comissão (5% do valor do imóvel final)
+      const taxaComissao = 0.05; // 5%
+      const comissao = mes.valorImovel * taxaComissao;
+      const lucroLiquidoComComissao = lucroLiquido - comissao;
       
       // Valorização prevista (acumulada desde o início)
       const valorizacaoPrevista = mes.valorImovel - detalhes[0].valorImovel;
@@ -68,13 +79,14 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       detalhesProcessed.push({
         ...mes,
         ganhoCapitalMensal,
-        ganhoCapitalAcumulado: ganhoReal, // Mesmo que ganhoReal
+        ganhoCapitalAcumulado: ganhoCapital, 
         ganhoReal,
         jurosPagos,
         jurosMesPago,
         jurosReforcosPagos,
         jurosReforcoMesPago,
         lucroLiquido,
+        lucroLiquidoComComissao,
         valorizacaoPrevista,
         temReforco: mes.temReforco
       });
@@ -96,6 +108,18 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Calculate the sum of property purchase price and total interest paid
   const valorImovelMaisJuros = valorCompraFinal + totalJurosPagos;
   
+  // Valor inicial da parcela (sem correção)
+  const valorParcelaSemCorrecao = totalParcelas / detalhes.length;
+  
+  // Número total de parcelas
+  const numeroParcelas = detalhes.length;
+  
+  // Número de reforços (anos)
+  const numeroReforcos = Math.floor(detalhes.length / 12);
+  
+  // Valor inicial do reforço (sem correção)
+  const valorReforcoSemCorrecao = numeroReforcos > 0 ? totalReforcos / numeroReforcos : 0;
+  
   // Get data for specific years to display in the table (yearly increments)
   const yearlyData = detalhesProcessed.filter(item => item.mes % 12 === 0 || item.mes === 1 || item.mes === detalhesProcessed.length);
 
@@ -116,6 +140,10 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         valorImovelMaisJuros={valorImovelMaisJuros}
         valorCompra={valorCompraFinal}
         resultado={resultado}
+        valorParcelaSemCorrecao={valorParcelaSemCorrecao}
+        numeroParcelas={numeroParcelas}
+        numeroReforcos={numeroReforcos}
+        valorReforcoSemCorrecao={valorReforcoSemCorrecao}
       />
       
       <GraficoResultado 
