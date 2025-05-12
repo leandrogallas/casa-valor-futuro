@@ -2,9 +2,10 @@
 import React from "react";
 import { ResponsiveContainer, CartesianGrid, Legend, Line, XAxis, YAxis, Tooltip, ComposedChart } from "recharts";
 import CustomTooltip from "./CustomTooltip";
+import { DetalhesMesProcessado } from "@/types/simulador";
 
 interface GraficoComparativoProps {
-  detalhesProcessed: any[];
+  detalhesProcessed: DetalhesMesProcessado[];
 }
 
 const GraficoComparativo: React.FC<GraficoComparativoProps> = ({ detalhesProcessed }) => {

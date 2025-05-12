@@ -39,7 +39,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       ganhoReal,
       lucroLiquido,
       valorizacaoPrevista
-    };
+    } as DetalhesMesProcessado;
   });
 
   // Latest data for cards

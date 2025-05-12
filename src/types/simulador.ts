@@ -10,6 +10,9 @@ export interface DadosSimulacao {
   meses: number;
 }
 
+// Importando DetalhesMes da mesma fonte que a usa
+import { DetalhesMes } from "@/utils/investmentCalculator";
+
 export interface DetalhesMesProcessado extends DetalhesMes {
   ganhoCapitalMensal: number;
   ganhoCapitalAcumulado: number;

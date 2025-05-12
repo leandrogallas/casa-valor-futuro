@@ -2,9 +2,10 @@
 import React from "react";
 import { ResponsiveContainer, CartesianGrid, Legend, Bar, Line, XAxis, YAxis, Tooltip, ComposedChart } from "recharts";
 import CustomTooltip from "./CustomTooltip";
+import { DetalhesMesProcessado } from "@/types/simulador";
 
 interface GraficoMensalProps {
-  detalhesProcessed: any[];
+  detalhesProcessed: DetalhesMesProcessado[];
 }
 
 const GraficoMensal: React.FC<GraficoMensalProps> = ({ detalhesProcessed }) => {
