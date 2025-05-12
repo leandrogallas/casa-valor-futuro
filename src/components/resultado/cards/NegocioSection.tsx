@@ -24,6 +24,12 @@ const NegocioSection: React.FC<NegocioSectionProps> = ({
   numeroReforcos,
   valorReforcoSemCorrecao
 }) => {
+  // Valor total das parcelas sem correção
+  const valorTotalParcelas = valorParcelaSemCorrecao * numeroParcelas;
+  
+  // Valor total dos reforços sem correção
+  const valorTotalReforcos = valorReforcoSemCorrecao * numeroReforcos;
+
   return (
     <Card className="shadow-md border-t-4 border-t-blue-500">
       <CardHeader>
@@ -69,7 +75,7 @@ const NegocioSection: React.FC<NegocioSectionProps> = ({
               <Calculator size={20} />
             </div>}
             bgColor="from-indigo-50 to-white"
-            subtitle={`Total: ${formatarMoeda(valorParcelaSemCorrecao * numeroParcelas)}`}
+            subtitle={`Total: ${formatarMoeda(valorTotalParcelas)}`}
           />
           
           <MetricCard
@@ -89,7 +95,7 @@ const NegocioSection: React.FC<NegocioSectionProps> = ({
               <Calculator size={20} />
             </div>}
             bgColor="from-cyan-50 to-white"
-            subtitle={`Total: ${formatarMoeda(valorReforcoSemCorrecao * numeroReforcos)}`}
+            subtitle={`Total: ${formatarMoeda(valorTotalReforcos)}`}
           />
         </div>
       </CardContent>

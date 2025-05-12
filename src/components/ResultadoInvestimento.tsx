@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ResultadoSimulacao, DetalhesMes, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 import CardsResumo from "./resultado/CardsResumo";
@@ -108,16 +107,16 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   // Calculate the sum of property purchase price and total interest paid
   const valorImovelMaisJuros = valorCompraFinal + totalJurosPagos;
   
-  // Valor inicial da parcela (sem correção)
-  const valorParcelaSemCorrecao = totalParcelas / detalhes.length;
+  // Valor da parcela sem correção (total das parcelas dividido pelo número de meses)
+  const valorParcelaSemCorrecao = detalhes.length > 0 ? totalParcelas / detalhes.length : 0;
   
-  // Número total de parcelas
+  // Número total de parcelas (igual ao número de meses)
   const numeroParcelas = detalhes.length;
   
   // Número de reforços (anos)
   const numeroReforcos = Math.floor(detalhes.length / 12);
   
-  // Valor inicial do reforço (sem correção)
+  // Valor do reforço sem correção (total dos reforços dividido pelo número de reforços)
   const valorReforcoSemCorrecao = numeroReforcos > 0 ? totalReforcos / numeroReforcos : 0;
   
   // Get data for specific years to display in the table (yearly increments)
