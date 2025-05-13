@@ -43,7 +43,7 @@ export function useSimulacao() {
       const resultadoCalculado = calcularSimulacaoInvestimento(dados);
       setResultado(resultadoCalculado);
       
-      // Processar detalhes para os gráficos e PDF
+      // Processar detalhes para os gráficos e PDF usando as definições padronizadas
       processarDetalhesMensais(resultadoCalculado);
       
       toast({
@@ -60,9 +60,9 @@ export function useSimulacao() {
     }
   };
   
-  // Função para processar os detalhes mensais
+  // Função para processar os detalhes mensais usando definições padronizadas
   const processarDetalhesMensais = (resultado: ResultadoSimulacao) => {
-    const { detalhes, valorCompra } = resultado;
+    const { detalhes, valorCompra, totalJurosParcelas, totalJurosReforcos } = resultado;
     
     if (!detalhes || detalhes.length === 0) {
       setDetalhesProcessados([]);
@@ -71,51 +71,59 @@ export function useSimulacao() {
 
     const processados: DetalhesMesProcessado[] = [];
     
+    // Total de juros acumulados (somando parcelas e reforços)
+    const totalJuros = totalJurosParcelas + totalJurosReforcos;
+    
     detalhes.forEach((mes, index) => {
       const mesAnterior = index > 0 ? detalhes[index - 1] : null;
       
-      // Monthly capital gain (valorização do mês)
+      // DEFINIÇÕES PADRONIZADAS:
+      
+      // 1. Ganho de capital mensal (valorização do mês atual)
       const ganhoCapitalMensal = mesAnterior 
         ? mes.valorImovel - mesAnterior.valorImovel 
         : mes.valorImovel - detalhes[0].valorImovel;
       
-      // DEFINIÇÃO PADRONIZADA: ganho de capital = valor final do imóvel - valor de compra
+      // 2. Ganho de capital acumulado (valor atual do imóvel - valor de compra)
       const ganhoCapitalAcumulado = mes.valorImovel - valorCompra;
       
-      // Juros pagos são calculados como a diferença entre o valor corrigido pelo CUB e o valor original
+      // 3. Juros pagos no mês atual (diferença entre parcela corrigida e parcela original)
       const indiceCub = mes.indiceCubMensal || 1;
       const valorParcelaSemCorrecao = resultado.parcelas / resultado.detalhes.length;
       const jurosMesPago = (mes.parcelaMensal - valorParcelaSemCorrecao);
       
-      // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
+      // 4. Juros acumulados até o mês atual
       const jurosPagos = index > 0 
         ? processados[index - 1].jurosPagos + jurosMesPago 
         : jurosMesPago;
       
-      // Juros relacionados aos reforços para este mês específico
+      // 5. Juros do reforço no mês atual (se houver)
       const valorReforcoSemCorrecao = resultado.reforcos / Math.floor(resultado.detalhes.length / 12);
       const jurosReforcoMesPago = mes.temReforco 
-        ? ((valorReforcoSemCorrecao * indiceCub) - valorReforcoSemCorrecao)
+        ? ((mes.parcelaMensal * indiceCub) - valorReforcoSemCorrecao)
         : 0;
       
-      // Juros acumulados relacionados aos reforços
+      // 6. Juros de reforços acumulados
       const jurosReforcosPagos = index > 0
         ? processados[index - 1].jurosReforcosPagos + (mes.temReforco ? jurosReforcoMesPago : 0)
         : jurosReforcoMesPago;
       
-      // DEFINIÇÃO PADRONIZADA: Ganho real = Ganho de capital - Total de juros pagos
+      // 7. Total de juros acumulados (parcelas + reforços)
       const totalJurosAcumulados = jurosPagos + jurosReforcosPagos;
+      
+      // 8. Ganho real (ganho de capital - total de juros)
       const ganhoReal = ganhoCapitalAcumulado - totalJurosAcumulados;
       
-      // DEFINIÇÃO PADRONIZADA: Lucro líquido = ganho real
+      // 9. Comissão de 5% sobre o valor atual do imóvel
+      const comissao = mes.valorImovel * 0.05;
+      
+      // 10. Lucro líquido (ganho real - comissão)
       const lucroLiquido = ganhoReal;
       
-      // DEFINIÇÃO PADRONIZADA: Lucro líquido após comissão (5% do valor do imóvel final)
-      const taxaComissao = 0.05; // 5%
-      const comissao = mes.valorImovel * taxaComissao;
+      // 11. Lucro líquido após comissão 
       const lucroLiquidoComComissao = lucroLiquido - comissao;
       
-      // DEFINIÇÃO PADRONIZADA: Valorização prevista = valor atual do imóvel
+      // 12. Valorização prevista (valor atual do imóvel)
       const valorizacaoPrevista = mes.valorImovel;
       
       processados.push({

@@ -28,17 +28,21 @@ const ValorizacaoSection: React.FC<ValorizacaoSectionProps> = ({
   meses,
   resultado
 }) => {
-  // Calcular comissão de 5%
+  // Cálculos padronizados
+  
+  // 1. Comissão de 5% sobre o valor final do imóvel
   const comissao = valorImovel * 0.05;
   
-  // Usar o lucro líquido depois da comissão dos dados processados
+  // 2. Usar os valores processados que seguem as definições padronizadas
+  const ganhoCapital = latestData.ganhoCapitalAcumulado;
+  const ganhoReal = latestData.ganhoReal;
   const lucroComComissao = latestData.lucroLiquidoComComissao;
   
-  // Correção do cálculo da valorização mensal
+  // 3. Taxas de valorização
   const valorizacaoAnual = resultado.valorizacao; // Ex: 0.12 para 12%
   const valorizacaoMensalCorrigida = Math.pow(1 + valorizacaoAnual, 1/12) - 1; // Taxa equivalente mensal
   
-  // Formatando para exibição
+  // Formatação para exibição
   const valorizacaoMensalPercentFormatada = formatarPercentual(valorizacaoMensalCorrigida * 100);
   const valorizacaoAnualPercentFormatada = formatarPercentual(valorizacaoAnual * 100);
   
@@ -64,22 +68,22 @@ const ValorizacaoSection: React.FC<ValorizacaoSectionProps> = ({
           
           <MetricCard
             title="Ganho de Capital"
-            value={formatarMoeda(latestData.ganhoCapitalAcumulado)}
+            value={formatarMoeda(ganhoCapital)}
             icon={<div className="bg-emerald-500 p-2 rounded-full text-white">
               <TrendingUp size={20} />
             </div>}
             bgColor="from-emerald-50 to-white"
-            subtitle={`Valorização - Valor Compra`}
+            subtitle={`Valor Final - Valor Compra`}
           />
           
           <MetricCard
             title="Ganho Real"
-            value={formatarMoeda(latestData.ganhoReal)}
+            value={formatarMoeda(ganhoReal)}
             icon={<div className="bg-teal-500 p-2 rounded-full text-white">
               <DollarSign size={20} />
             </div>}
             bgColor="from-teal-50 to-white"
-            subtitle={`Ganho Capital - Juros`}
+            subtitle={`Ganho Capital - Juros Pagos`}
           />
           
           <MetricCard

@@ -25,12 +25,12 @@ const RelatorioPreviewTab: React.FC<RelatorioPreviewTabProps> = ({
   opcoesPDF,
   detalhesProcessados
 }) => {
-  // Calculate additional metrics similar to CardsResumo
+  // Verificar se temos dados processados
   const latestData = detalhesProcessados && detalhesProcessados.length > 0 
     ? detalhesProcessados[detalhesProcessados.length - 1] 
     : undefined;
   
-  // Calculate values needed for details just like CardsResumo
+  // Calcular valores necessários para os detalhes usando as definições padronizadas
   const meses = resultado.detalhes.length;
   const numeroParcelas = meses;
   const numeroReforcos = Math.floor(meses / 12);
@@ -38,17 +38,19 @@ const RelatorioPreviewTab: React.FC<RelatorioPreviewTabProps> = ({
   const valorReforcoSemCorrecao = numeroReforcos > 0 ? resultado.reforcos / numeroReforcos : 0;
   const totalJurosPagos = resultado.totalJurosParcelas + resultado.totalJurosReforcos;
   
-  // Standardized definition: capital gain = final property value - purchase value
+  // 1. Ganho de capital (DEFINIÇÃO PADRONIZADA)
   const ganhoCapital = resultado.valorImovel - resultado.valorCompra;
   
-  // Standardized definition: real gain = capital gain - total interest paid
+  // 2. Ganho real (DEFINIÇÃO PADRONIZADA)
   const ganhoReal = ganhoCapital - totalJurosPagos;
   
-  // Standardized definition: net profit = real gain - commission (5% of final value)
+  // 3. Comissão (5% do valor final do imóvel)
   const comissao = resultado.valorImovel * 0.05;
+  
+  // 4. Lucro líquido (DEFINIÇÃO PADRONIZADA)
   const lucroLiquido = ganhoReal - comissao;
   
-  // Calculate the return percentage based on the adjusted profit
+  // 5. Retorno percentual com base no lucro ajustado
   const retornoAjustado = resultado.totalInvestido > 0 ? lucroLiquido / resultado.totalInvestido : 0;
   
   return (

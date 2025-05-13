@@ -16,23 +16,26 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
 }) => {
   const { totalInvestido, valorImovel, valorCompra } = resultado;
   
-  // Calculate total interest paid
+  // Cálculos padronizados
+  // 1. Total de juros pagos
   const totalJurosPagos = resultado.totalJurosParcelas + resultado.totalJurosReforcos;
   
-  // DEFINIÇÃO PADRONIZADA: ganho de capital = valor final do imóvel - valor de compra
+  // 2. Ganho de capital (DEFINIÇÃO PADRONIZADA)
   const ganhoCapital = valorImovel - valorCompra;
   
-  // DEFINIÇÃO PADRONIZADA: ganho real = ganho capital - total juros pagos
+  // 3. Ganho real (DEFINIÇÃO PADRONIZADA)
   const ganhoReal = ganhoCapital - totalJurosPagos;
   
-  // DEFINIÇÃO PADRONIZADA: lucro líquido = ganho real - comissão
+  // 4. Comissão (5% do valor final do imóvel)
   const comissao = valorImovel * 0.05;
+  
+  // 5. Lucro líquido (DEFINIÇÃO PADRONIZADA)
   const lucroLiquido = ganhoReal - comissao;
   
-  // Ensure consistent values by prioritizing processed data if available
+  // Priorizar dados processados se disponíveis
   const lucro = latestData ? latestData.lucroLiquidoComComissao : lucroLiquido;
   
-  // Calculate return percentage based on the final profit
+  // Calcular o retorno percentual com base no lucro final
   const retornoFinal = latestData 
     ? latestData.lucroLiquidoComComissao / totalInvestido 
     : retornoPercentual;
@@ -64,7 +67,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
         </div>
         
         <div className={`bg-gradient-to-br ${lucro > 0 ? "from-green-50 to-green-100" : "from-red-50 to-red-100"} border-none shadow-sm rounded-md p-4`}>
-          <p className="text-sm font-medium text-muted-foreground">Lucro</p>
+          <p className="text-sm font-medium text-muted-foreground">Lucro Líquido</p>
           <p className={`text-xl font-bold ${lucro > 0 ? "text-green-600" : "text-red-600"}`}>
             {formatarMoeda(lucro)}
           </p>

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ResultadoSimulacao, DetalhesMes, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
+import { ResultadoSimulacao, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
 import CardsResumo from "./resultado/CardsResumo";
 import GraficoResultado from "./resultado/GraficoResultado";
 import { DetalhesMesProcessado } from "@/types/simulador";
@@ -12,6 +12,7 @@ interface ResultadoInvestimentoProps {
 const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado }) => {
   if (!resultado) return null;
 
+  // Extrair valores do resultado
   const { 
     totalInvestido, 
     valorImovel, 
@@ -29,55 +30,61 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
     indiceCubFinal
   } = resultado;
 
-  // Calculate additional metrics for each month following the standardized definitions
+  // Calcular métricas adicionais com DEFINIÇÕES PADRONIZADAS
   const detalhesProcessed: DetalhesMesProcessado[] = [];
   
   if (detalhes && detalhes.length > 0) {
+    // Total de juros pagos (parcelas + reforços)
+    const totalJurosPagos = totalJurosParcelas + totalJurosReforcos;
+    
     detalhes.forEach((mes, index) => {
       const mesAnterior = index > 0 ? detalhes[index - 1] : null;
       
-      // Valorização mensal (diferença para o mês anterior)
+      // 1. Ganho de capital mensal
       const ganhoCapitalMensal = mesAnterior 
         ? mes.valorImovel - mesAnterior.valorImovel 
         : mes.valorImovel - detalhes[0].valorImovel;
       
-      // DEFINIÇÃO PADRONIZADA: ganho capital acumulado = valor atual do imóvel - valor compra inicial
+      // 2. Ganho de capital acumulado (DEFINIÇÃO PADRONIZADA)
       const ganhoCapitalAcumulado = mes.valorImovel - valorCompra;
       
-      // Cálculo de juros mensais
+      // 3. Juros pagos no mês
       const indiceCub = mes.indiceCubMensal || 1;
       const valorParcelaSemCorrecao = resultado.parcelas / resultado.detalhes.length;
       const jurosMesPago = (mes.parcelaMensal - valorParcelaSemCorrecao);
       
-      // Juros acumulados até o mês atual
+      // 4. Juros acumulados
       const jurosPagos = index > 0 
         ? detalhesProcessed[index - 1].jurosPagos + jurosMesPago 
         : jurosMesPago;
       
-      // Juros dos reforços
+      // 5. Juros de reforço no mês
       const valorReforcoSemCorrecao = resultado.reforcos / Math.floor(resultado.detalhes.length / 12);
       const jurosReforcoMesPago = mes.temReforco 
         ? ((valorReforcoSemCorrecao * indiceCub) - valorReforcoSemCorrecao)
         : 0;
       
-      // Juros acumulados relacionados aos reforços
+      // 6. Juros de reforços acumulados
       const jurosReforcosPagos = index > 0
         ? detalhesProcessed[index - 1].jurosReforcosPagos + (mes.temReforco ? jurosReforcoMesPago : 0)
         : jurosReforcoMesPago;
       
-      // DEFINIÇÃO PADRONIZADA: Ganho real = ganho capital acumulado - total de juros
+      // 7. Total de juros acumulados
       const totalJurosAcumulados = jurosPagos + jurosReforcosPagos;
+      
+      // 8. Ganho real (DEFINIÇÃO PADRONIZADA)
       const ganhoReal = ganhoCapitalAcumulado - totalJurosAcumulados;
       
-      // DEFINIÇÃO PADRONIZADA: Lucro líquido é o ganho real
+      // 9. Comissão (5% do valor do imóvel)
+      const comissao = mes.valorImovel * 0.05;
+      
+      // 10. Lucro líquido (DEFINIÇÃO PADRONIZADA)
       const lucroLiquido = ganhoReal;
       
-      // DEFINIÇÃO PADRONIZADA: Lucro líquido após comissão (5% do valor do imóvel final)
-      const taxaComissao = 0.05; // 5%
-      const comissao = mes.valorImovel * taxaComissao;
+      // 11. Lucro líquido após comissão (DEFINIÇÃO PADRONIZADA)
       const lucroLiquidoComComissao = lucroLiquido - comissao;
       
-      // DEFINIÇÃO PADRONIZADA: Valorização prevista = valor atual do imóvel
+      // 12. Valorização prevista
       const valorizacaoPrevista = mes.valorImovel;
       
       detalhesProcessed.push({
@@ -99,22 +106,23 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
     });
   }
 
-  // Latest data for cards
-  const latestData = detalhesProcessed.length > 0 ? detalhesProcessed[detalhesProcessed.length - 1] : null;
+  // Verificar se temos dados processados
+  if (detalhesProcessed.length === 0) return null;
   
-  // Only proceed if we have processed data
-  if (!latestData) return null;
+  // Utilizar os dados do último mês para os cartões
+  const latestData = detalhesProcessed[detalhesProcessed.length - 1];
   
-  // DEFINIÇÃO PADRONIZADA: Total de juros pagos = juros parcelas + juros reforços
+  // DEFINIÇÕES PADRONIZADAS para cálculos globais
+  // 1. Total de juros pagos = juros parcelas + juros reforços
   const totalJurosPagos = totalJurosParcelas + totalJurosReforcos;
   
-  // DEFINIÇÃO PADRONIZADA: ganho de capital = valor final do imóvel - valor de compra
+  // 2. Ganho de capital = valor final do imóvel - valor de compra
   const ganhoCapital = valorImovel - valorCompra;
   
-  // DEFINIÇÃO PADRONIZADA: ganho real = ganho de capital - total de juros pagos
+  // 3. Ganho real = ganho de capital - total de juros pagos
   const ganhoReal = ganhoCapital - totalJurosPagos;
   
-  // DEFINIÇÃO PADRONIZADA: Valor do imóvel mais juros = valor de compra + total de juros
+  // 4. Valor do imóvel mais juros = valor de compra + total de juros
   const valorImovelMaisJuros = valorCompra + totalJurosPagos;
   
   // Cálculos para parcelas e reforços
@@ -123,7 +131,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   const numeroReforcos = Math.floor(detalhes.length / 12);
   const valorReforcoSemCorrecao = numeroReforcos > 0 ? resultado.reforcos / numeroReforcos : 0;
   
-  // Get data for specific years to display in the table (yearly increments)
+  // Selecionar dados para exibição na tabela (incrementos anuais)
   const yearlyData = detalhesProcessed.filter(item => item.mes % 12 === 0 || item.mes === 1 || item.mes === detalhesProcessed.length);
 
   return (
@@ -133,7 +141,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       <CardsResumo 
         totalInvestido={totalInvestido}
         valorImovel={valorImovel}
-        lucro={latestData.lucroLiquidoComComissao}
+        lucro={latestData.lucroLiquidoComComissao} // Usando o valor mais recente calculado com definições padronizadas
         retornoPercentual={latestData.lucroLiquidoComComissao / totalInvestido}
         latestData={latestData}
         meses={detalhes.length}

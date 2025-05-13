@@ -1,3 +1,4 @@
+
 // Core calculation functions for investment simulation
 import { DadosSimulacao, DetalhesMes, ResultadoSimulacao } from './types';
 
@@ -172,7 +173,21 @@ export function calcularSimulacaoInvestimento(dados: DadosSimulacao): ResultadoS
   // Cálculo final dos resultados - mantendo sempre a mesma precisão decimal
   const valorImovelFinal = parseFloat((valorInicialImovel * Math.pow(1 + valorizacao, meses / 12)).toFixed(2));
   const totalInvestidoFinal = parseFloat(detalhes[detalhes.length - 1].investido.toFixed(2));
-  const lucro = parseFloat((valorImovelFinal - totalInvestidoFinal).toFixed(2));
+  
+  // CORREÇÃO PRINCIPAL: Padronizar o cálculo do lucro como a diferença entre o valor final do imóvel e o valor de compra
+  // Em vez de usar o totalInvestidoFinal, usamos o valorCompra para calcular o ganho de capital
+  const ganhoCapital = parseFloat((valorImovelFinal - valorCompra).toFixed(2));
+  const totalJurosTotal = parseFloat((totalJurosParcelas + totalJurosReforcos).toFixed(2));
+  
+  // Ganho real = ganho de capital - juros pagos
+  const ganhoReal = parseFloat((ganhoCapital - totalJurosTotal).toFixed(2));
+  
+  // Comissão de 5% sobre o valor final
+  const comissao = parseFloat((valorImovelFinal * 0.05).toFixed(2));
+  
+  // Lucro líquido = ganho real - comissão
+  const lucro = parseFloat((ganhoReal - comissao).toFixed(2));
+  
   const retornoPercentual = parseFloat(((totalInvestidoFinal > 0 ? (lucro / totalInvestidoFinal) : 0)).toFixed(4));
   
   // Valor final do CUB
