@@ -61,6 +61,7 @@ const RelatorioPreviewTab: React.FC<RelatorioPreviewTabProps> = ({
       <InvestmentDetails 
         dadosSimulacao={dadosSimulacao} 
         resultado={resultado}
+        latestData={latestData}
         valorParcelaSemCorrecao={valorParcelaSemCorrecao}
         valorReforcoSemCorrecao={valorReforcoSemCorrecao}
         numeroParcelas={numeroParcelas}

@@ -14,7 +14,15 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
   latestData,
   retornoPercentual
 }) => {
-  const { totalInvestido, valorImovel, lucro } = resultado;
+  const { totalInvestido, valorImovel } = resultado;
+  
+  // Use lucroLiquidoComComissao from latestData if available, otherwise fallback to resultado.lucro
+  const lucro = latestData ? latestData.lucroLiquidoComComissao : resultado.lucro;
+  
+  // Recalculate return percentage based on the adjusted profit
+  const retornoAjustado = latestData 
+    ? latestData.lucroLiquidoComComissao / totalInvestido 
+    : retornoPercentual;
 
   // Ícone com cor
   const getIcon = () => (
@@ -49,10 +57,10 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
           </p>
         </div>
         
-        <div className={`bg-gradient-to-br ${retornoPercentual > 0 ? "from-green-50 to-green-100" : "from-red-50 to-red-100"} border-none shadow-sm rounded-md p-4`}>
+        <div className={`bg-gradient-to-br ${retornoAjustado > 0 ? "from-green-50 to-green-100" : "from-red-50 to-red-100"} border-none shadow-sm rounded-md p-4`}>
           <p className="text-sm font-medium text-muted-foreground">Retorno sobre Investimento</p>
-          <p className={`text-xl font-bold ${retornoPercentual > 0 ? "text-green-600" : "text-red-600"}`}>
-            {(retornoPercentual * 100).toFixed(2)}%
+          <p className={`text-xl font-bold ${retornoAjustado > 0 ? "text-green-600" : "text-red-600"}`}>
+            {(retornoAjustado * 100).toFixed(2)}%
           </p>
         </div>
       </div>

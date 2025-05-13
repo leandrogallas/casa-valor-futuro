@@ -2,10 +2,12 @@
 import React from "react";
 import { DadosSimulacao } from "@/types/simulador";
 import { ResultadoSimulacao, formatarMoeda, formatarPercentual } from "@/utils/investmentCalculator";
+import { DetalhesMesProcessado } from "@/types/simulador";
 
 interface InvestmentDetailsProps {
   dadosSimulacao: DadosSimulacao;
   resultado: ResultadoSimulacao;
+  latestData?: DetalhesMesProcessado;
   valorParcelaSemCorrecao?: number;
   valorReforcoSemCorrecao?: number;
   numeroParcelas?: number;
@@ -16,6 +18,7 @@ interface InvestmentDetailsProps {
 const InvestmentDetails: React.FC<InvestmentDetailsProps> = ({
   dadosSimulacao,
   resultado,
+  latestData,
   valorParcelaSemCorrecao,
   valorReforcoSemCorrecao,
   numeroParcelas,
