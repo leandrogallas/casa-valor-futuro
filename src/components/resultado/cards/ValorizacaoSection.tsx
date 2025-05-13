@@ -30,10 +30,11 @@ const ValorizacaoSection: React.FC<ValorizacaoSectionProps> = ({
 }) => {
   // Calcular comissão de 5%
   const comissao = valorImovel * 0.05;
+  
+  // Usar o lucro líquido depois da comissão dos dados processados
   const lucroComComissao = latestData.lucroLiquidoComComissao;
-
+  
   // Correção do cálculo da valorização mensal
-  // Calculamos a taxa mensal equivalente a partir da taxa anual
   const valorizacaoAnual = resultado.valorizacao; // Ex: 0.12 para 12%
   const valorizacaoMensalCorrigida = Math.pow(1 + valorizacaoAnual, 1/12) - 1; // Taxa equivalente mensal
   

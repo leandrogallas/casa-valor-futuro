@@ -79,12 +79,10 @@ export function useSimulacao() {
         ? mes.valorImovel - mesAnterior.valorImovel 
         : mes.valorImovel - detalhes[0].valorImovel;
       
-      // Ganho capital é a valorização do imóvel menos o valor de compra
-      // CORRIGIDO: ganho de capital = valor atual do imóvel - valor de compra
+      // DEFINIÇÃO PADRONIZADA: ganho de capital = valor final do imóvel - valor de compra
       const ganhoCapitalAcumulado = mes.valorImovel - valorCompra;
       
       // Juros pagos são calculados como a diferença entre o valor corrigido pelo CUB e o valor original
-      // Calculamos o juro com base no índice do CUB
       const indiceCub = mes.indiceCubMensal || 1;
       const valorParcelaSemCorrecao = resultado.parcelas / resultado.detalhes.length;
       const jurosMesPago = (mes.parcelaMensal - valorParcelaSemCorrecao);
@@ -105,24 +103,25 @@ export function useSimulacao() {
         ? processados[index - 1].jurosReforcosPagos + (mes.temReforco ? jurosReforcoMesPago : 0)
         : jurosReforcoMesPago;
       
-      // CORRIGIDO: Ganho real = Ganho de capital - Total de juros pagos
-      const ganhoReal = ganhoCapitalAcumulado - jurosPagos - jurosReforcosPagos;
+      // DEFINIÇÃO PADRONIZADA: Ganho real = Ganho de capital - Total de juros pagos
+      const totalJurosAcumulados = jurosPagos + jurosReforcosPagos;
+      const ganhoReal = ganhoCapitalAcumulado - totalJurosAcumulados;
       
-      // CORRIGIDO: Lucro líquido é igual ao ganho real
+      // DEFINIÇÃO PADRONIZADA: Lucro líquido = ganho real
       const lucroLiquido = ganhoReal;
       
-      // Lucro líquido após comissão (5% do valor do imóvel final)
+      // DEFINIÇÃO PADRONIZADA: Lucro líquido após comissão (5% do valor do imóvel final)
       const taxaComissao = 0.05; // 5%
       const comissao = mes.valorImovel * taxaComissao;
       const lucroLiquidoComComissao = lucroLiquido - comissao;
       
-      // Valorização prevista (acumulada desde o início)
+      // DEFINIÇÃO PADRONIZADA: Valorização prevista = valor atual do imóvel
       const valorizacaoPrevista = mes.valorImovel;
       
       processados.push({
         ...mes,
         ganhoCapitalMensal,
-        ganhoCapitalAcumulado, // CORRIGIDO: usar ganhoCapitalAcumulado corretamente calculado
+        ganhoCapitalAcumulado,
         ganhoReal,
         jurosPagos,
         jurosMesPago,

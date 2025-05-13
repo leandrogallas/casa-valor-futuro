@@ -31,7 +31,8 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = ({
     totalJurosReforcos, 
     cubInicial,
     cubFinal,
-    indiceCubFinal
+    indiceCubFinal,
+    valorCompra
   } = resultado;
   
   // Calcular valores caso não sejam fornecidos
@@ -97,6 +98,11 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = ({
             <p className="text-sm font-medium text-muted-foreground">Custo Total do Imóvel</p>
             <p className="font-medium">{formatarMoeda(totalInvestido)}</p>
             <p className="text-xs text-muted-foreground">Inclui entrada, parcelas e reforços com correção CUB</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Valor de Compra</p>
+            <p className="font-medium">{formatarMoeda(valorCompra)}</p>
+            <p className="text-xs text-muted-foreground">Valor original de aquisição do imóvel</p>
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground">CUB Inicial</p>

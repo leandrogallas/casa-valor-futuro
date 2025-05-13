@@ -38,6 +38,19 @@ const RelatorioPreviewTab: React.FC<RelatorioPreviewTabProps> = ({
   const valorReforcoSemCorrecao = numeroReforcos > 0 ? resultado.reforcos / numeroReforcos : 0;
   const totalJurosPagos = resultado.totalJurosParcelas + resultado.totalJurosReforcos;
   
+  // Standardized definition: capital gain = final property value - purchase value
+  const ganhoCapital = resultado.valorImovel - resultado.valorCompra;
+  
+  // Standardized definition: real gain = capital gain - total interest paid
+  const ganhoReal = ganhoCapital - totalJurosPagos;
+  
+  // Standardized definition: net profit = real gain - commission (5% of final value)
+  const comissao = resultado.valorImovel * 0.05;
+  const lucroLiquido = ganhoReal - comissao;
+  
+  // Calculate the return percentage based on the adjusted profit
+  const retornoAjustado = resultado.totalInvestido > 0 ? lucroLiquido / resultado.totalInvestido : 0;
+  
   return (
     <CardContent className="p-6 space-y-6">
       {/* Seção de detalhes do empreendimento */}
@@ -52,7 +65,7 @@ const RelatorioPreviewTab: React.FC<RelatorioPreviewTabProps> = ({
       <InvestmentSummary 
         resultado={resultado}
         latestData={latestData}
-        retornoPercentual={resultado.retornoPercentual} 
+        retornoPercentual={retornoAjustado} 
       />
       
       <Separator />
