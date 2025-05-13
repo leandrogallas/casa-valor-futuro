@@ -62,7 +62,7 @@ export function useSimulacao() {
   
   // Função para processar os detalhes mensais usando definições padronizadas
   const processarDetalhesMensais = (resultado: ResultadoSimulacao) => {
-    const { detalhes, valorCompra, totalJurosParcelas, totalJurosReforcos } = resultado;
+    const { detalhes, valorCompra } = resultado;
     
     if (!detalhes || detalhes.length === 0) {
       setDetalhesProcessados([]);
@@ -71,8 +71,11 @@ export function useSimulacao() {
 
     const processados: DetalhesMesProcessado[] = [];
     
-    // Total de juros acumulados (somando parcelas e reforços)
-    const totalJuros = totalJurosParcelas + totalJurosReforcos;
+    // Variáveis para cálculos padronizados
+    const meses = detalhes.length;
+    const valorParcelaSemCorrecao = resultado.parcelas / meses;
+    const numReforcos = Math.floor(meses / 12);
+    const valorReforcoSemCorrecao = numReforcos > 0 ? resultado.reforcos / numReforcos : 0;
     
     detalhes.forEach((mes, index) => {
       const mesAnterior = index > 0 ? detalhes[index - 1] : null;
@@ -82,14 +85,13 @@ export function useSimulacao() {
       // 1. Ganho de capital mensal (valorização do mês atual)
       const ganhoCapitalMensal = mesAnterior 
         ? mes.valorImovel - mesAnterior.valorImovel 
-        : mes.valorImovel - detalhes[0].valorImovel;
+        : mes.valorImovel - valorCompra;
       
       // 2. Ganho de capital acumulado (valor atual do imóvel - valor de compra)
       const ganhoCapitalAcumulado = mes.valorImovel - valorCompra;
       
       // 3. Juros pagos no mês atual (diferença entre parcela corrigida e parcela original)
       const indiceCub = mes.indiceCubMensal || 1;
-      const valorParcelaSemCorrecao = resultado.parcelas / resultado.detalhes.length;
       const jurosMesPago = (mes.parcelaMensal - valorParcelaSemCorrecao);
       
       // 4. Juros acumulados até o mês atual
@@ -97,10 +99,10 @@ export function useSimulacao() {
         ? processados[index - 1].jurosPagos + jurosMesPago 
         : jurosMesPago;
       
-      // 5. Juros do reforço no mês atual (se houver)
-      const valorReforcoSemCorrecao = resultado.reforcos / Math.floor(resultado.detalhes.length / 12);
+      // 5. Juros do reforço no mês atual (se houver) - CORRIGIDO
+      // IMPORTANTE: Esta é a fórmula corrigida para cálculo dos juros de reforço
       const jurosReforcoMesPago = mes.temReforco 
-        ? ((mes.parcelaMensal * indiceCub) - valorReforcoSemCorrecao)
+        ? ((valorReforcoSemCorrecao * indiceCub) - valorReforcoSemCorrecao)
         : 0;
       
       // 6. Juros de reforços acumulados

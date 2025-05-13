@@ -28,7 +28,7 @@ const ValorizacaoSection: React.FC<ValorizacaoSectionProps> = ({
   meses,
   resultado
 }) => {
-  // Cálculos padronizados
+  // DEFINIÇÕES PADRONIZADAS - Usando diretamente os valores calculados em latestData
   
   // 1. Comissão de 5% sobre o valor final do imóvel
   const comissao = valorImovel * 0.05;

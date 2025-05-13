@@ -16,8 +16,6 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   const { 
     totalInvestido, 
     valorImovel, 
-    lucro, 
-    retornoPercentual, 
     detalhes, 
     totalJurosParcelas, 
     totalJurosReforcos, 
@@ -34,8 +32,11 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
   const detalhesProcessed: DetalhesMesProcessado[] = [];
   
   if (detalhes && detalhes.length > 0) {
-    // Total de juros pagos (parcelas + reforços)
-    const totalJurosPagos = totalJurosParcelas + totalJurosReforcos;
+    // Variáveis para cálculos padronizados
+    const meses = detalhes.length;
+    const valorParcelaSemCorrecao = resultado.parcelas / meses;
+    const numReforcos = Math.floor(meses / 12);
+    const valorReforcoSemCorrecao = numReforcos > 0 ? resultado.reforcos / numReforcos : 0;
     
     detalhes.forEach((mes, index) => {
       const mesAnterior = index > 0 ? detalhes[index - 1] : null;
@@ -43,14 +44,13 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       // 1. Ganho de capital mensal
       const ganhoCapitalMensal = mesAnterior 
         ? mes.valorImovel - mesAnterior.valorImovel 
-        : mes.valorImovel - detalhes[0].valorImovel;
+        : mes.valorImovel - valorCompra;
       
       // 2. Ganho de capital acumulado (DEFINIÇÃO PADRONIZADA)
       const ganhoCapitalAcumulado = mes.valorImovel - valorCompra;
       
       // 3. Juros pagos no mês
       const indiceCub = mes.indiceCubMensal || 1;
-      const valorParcelaSemCorrecao = resultado.parcelas / resultado.detalhes.length;
       const jurosMesPago = (mes.parcelaMensal - valorParcelaSemCorrecao);
       
       // 4. Juros acumulados
@@ -58,8 +58,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         ? detalhesProcessed[index - 1].jurosPagos + jurosMesPago 
         : jurosMesPago;
       
-      // 5. Juros de reforço no mês
-      const valorReforcoSemCorrecao = resultado.reforcos / Math.floor(resultado.detalhes.length / 12);
+      // 5. Juros de reforço no mês - PADRONIZADO
       const jurosReforcoMesPago = mes.temReforco 
         ? ((valorReforcoSemCorrecao * indiceCub) - valorReforcoSemCorrecao)
         : 0;
