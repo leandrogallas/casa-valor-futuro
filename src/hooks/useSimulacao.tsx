@@ -62,7 +62,7 @@ export function useSimulacao() {
   
   // Função para processar os detalhes mensais
   const processarDetalhesMensais = (resultado: ResultadoSimulacao) => {
-    const { detalhes } = resultado;
+    const { detalhes, valorCompra } = resultado;
     
     if (!detalhes || detalhes.length === 0) {
       setDetalhesProcessados([]);
@@ -79,13 +79,14 @@ export function useSimulacao() {
         ? mes.valorImovel - mesAnterior.valorImovel 
         : mes.valorImovel - detalhes[0].valorImovel;
       
-      // Ganho real é apenas a valorização do imóvel
-      const ganhoReal = mes.valorImovel - detalhes[0].valorImovel;
+      // Ganho capital é a valorização do imóvel menos o valor de compra
+      // CORRIGIDO: ganho de capital = valor atual do imóvel - valor de compra
+      const ganhoCapitalAcumulado = mes.valorImovel - valorCompra;
       
       // Juros pagos são calculados como a diferença entre o valor corrigido pelo CUB e o valor original
       // Calculamos o juro com base no índice do CUB
       const indiceCub = mes.indiceCubMensal || 1;
-      const valorParcelaSemCorrecao = resultado.valorCompra / resultado.detalhes.length;
+      const valorParcelaSemCorrecao = resultado.parcelas / resultado.detalhes.length;
       const jurosMesPago = (mes.parcelaMensal - valorParcelaSemCorrecao);
       
       // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
@@ -104,8 +105,11 @@ export function useSimulacao() {
         ? processados[index - 1].jurosReforcosPagos + (mes.temReforco ? jurosReforcoMesPago : 0)
         : jurosReforcoMesPago;
       
-      // Lucro líquido é a diferença entre o ganho real (valorização) e os juros pagos (parcelas + reforços)
-      const lucroLiquido = ganhoReal - jurosPagos - jurosReforcosPagos;
+      // CORRIGIDO: Ganho real = Ganho de capital - Total de juros pagos
+      const ganhoReal = ganhoCapitalAcumulado - jurosPagos - jurosReforcosPagos;
+      
+      // CORRIGIDO: Lucro líquido é igual ao ganho real
+      const lucroLiquido = ganhoReal;
       
       // Lucro líquido após comissão (5% do valor do imóvel final)
       const taxaComissao = 0.05; // 5%
@@ -113,12 +117,12 @@ export function useSimulacao() {
       const lucroLiquidoComComissao = lucroLiquido - comissao;
       
       // Valorização prevista (acumulada desde o início)
-      const valorizacaoPrevista = mes.valorImovel - detalhes[0].valorImovel;
+      const valorizacaoPrevista = mes.valorImovel;
       
       processados.push({
         ...mes,
         ganhoCapitalMensal,
-        ganhoCapitalAcumulado: ganhoReal, // Mesmo que ganhoReal
+        ganhoCapitalAcumulado, // CORRIGIDO: usar ganhoCapitalAcumulado corretamente calculado
         ganhoReal,
         jurosPagos,
         jurosMesPago,

@@ -15,6 +15,7 @@ interface ValorizacaoSectionProps {
   meses: number;
   resultado: {
     valorizacao: number;
+    valorCompra: number;
   };
 }
 
@@ -77,7 +78,7 @@ const ValorizacaoSection: React.FC<ValorizacaoSectionProps> = ({
               <DollarSign size={20} />
             </div>}
             bgColor="from-teal-50 to-white"
-            subtitle={`Valorização - Valor Compra - Juros`}
+            subtitle={`Ganho Capital - Juros`}
           />
           
           <MetricCard
@@ -88,7 +89,7 @@ const ValorizacaoSection: React.FC<ValorizacaoSectionProps> = ({
             </div>}
             bgColor={lucroComComissao > 0 ? 'from-green-50 to-white' : 'from-red-50 to-white'}
             textColor={lucroComComissao > 0 ? 'text-green-600' : 'text-red-600'}
-            subtitle={`Após comissão de 5% (${formatarMoeda(comissao)})`}
+            subtitle={`Ganho Real - Comissão ${formatarPercentual(5)} (${formatarMoeda(comissao)})`}
           />
           
           <MetricCard

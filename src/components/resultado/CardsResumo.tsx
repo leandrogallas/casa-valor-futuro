@@ -54,8 +54,8 @@ const CardsResumo: React.FC<CardsResumoProps> = ({
   const valorizacaoAnual = resultado.valorizacao;
   const valorizacaoMensalPercent = Math.pow(1 + valorizacaoAnual, 1/12) - 1;
   
-  // Cálculo da valorização mensal em R$
-  // Usa o valor total da valorização dividido pelo número de meses
+  // CORRIGIDO: Cálculo da valorização mensal em R$
+  // Usa o ganho de capital total dividido pelo número de meses
   const ganhoCapitalTotal = valorImovel - valorCompra;
   const valorizacaoMensalReais = ganhoCapitalTotal / meses;
 

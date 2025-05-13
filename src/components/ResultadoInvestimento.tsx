@@ -41,13 +41,13 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         ? mes.valorImovel - mesAnterior.valorImovel 
         : mes.valorImovel - detalhes[0].valorImovel;
       
-      // Ganho capital é a valorização do imóvel menos o valor de compra
-      const ganhoCapital = mes.valorImovel - valorCompra;
+      // CORRIGIDO: Ganho capital acumulado = valor atual do imóvel - valor compra inicial
+      const ganhoCapitalAcumulado = mes.valorImovel - valorCompra;
       
       // Juros pagos são calculados como a diferença entre o valor corrigido pelo CUB e o valor original
       // Usando o índice CUB mensal se disponível
       const indiceCub = mes.indiceCubMensal || 1;
-      const valorParcelaSemCorrecao = resultado.valorCompra / resultado.detalhes.length;
+      const valorParcelaSemCorrecao = resultado.parcelas / resultado.detalhes.length;
       const jurosMesPago = (mes.parcelaMensal - valorParcelaSemCorrecao);
       
       // Calcular o juro acumulado até este mês (soma de todos os juros pagos até agora)
@@ -66,24 +66,24 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         ? detalhesProcessed[index - 1].jurosReforcosPagos + (mes.temReforco ? jurosReforcoMesPago : 0)
         : jurosReforcoMesPago;
       
-      // Ganho real é a valorização menos os juros pagos
-      const ganhoReal = ganhoCapital - jurosPagos - jurosReforcosPagos;
+      // CORRIGIDO: Ganho real = ganho capital acumulado - total de juros
+      const ganhoReal = ganhoCapitalAcumulado - jurosPagos - jurosReforcosPagos;
       
-      // Lucro líquido é o ganho real
+      // CORRIGIDO: Lucro líquido é o ganho real
       const lucroLiquido = ganhoReal;
       
-      // Lucro líquido após comissão (5% do valor do imóvel final)
+      // CORRIGIDO: Lucro líquido após comissão (5% do valor do imóvel final)
       const taxaComissao = 0.05; // 5%
       const comissao = mes.valorImovel * taxaComissao;
       const lucroLiquidoComComissao = lucroLiquido - comissao;
       
-      // Valorização prevista (acumulada desde o início)
-      const valorizacaoPrevista = mes.valorImovel - detalhes[0].valorImovel;
+      // CORRIGIDO: Valorização prevista = valor atual do imóvel
+      const valorizacaoPrevista = mes.valorImovel;
       
       detalhesProcessed.push({
         ...mes,
         ganhoCapitalMensal,
-        ganhoCapitalAcumulado: ganhoCapital, 
+        ganhoCapitalAcumulado,
         ganhoReal,
         jurosPagos,
         jurosMesPago,
@@ -138,8 +138,8 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
       <CardsResumo 
         totalInvestido={totalInvestido}
         valorImovel={valorImovel}
-        lucro={lucro}
-        retornoPercentual={retornoPercentual}
+        lucro={latestData.lucroLiquidoComComissao} // CORRIGIDO: Usando lucro líquido com comissão
+        retornoPercentual={latestData.lucroLiquidoComComissao / totalInvestido} // CORRIGIDO: Recalculando o retorno percentual
         latestData={latestData}
         meses={detalhes.length}
         totalJurosPagos={totalJurosPagos}

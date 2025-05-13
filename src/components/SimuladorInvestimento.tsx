@@ -41,6 +41,7 @@ const SimuladorInvestimento: React.FC = () => {
             resultado={resultado}
             dados={dados}
             dadosEmpreendimento={dadosEmpreendimento}
+            detalhesProcessados={detalhesProcessados}
             onEmpreendimentoChange={handleEmpreendimentoChange}
             setActiveTab={setActiveTab}
             onEnviarPDF={() => 
