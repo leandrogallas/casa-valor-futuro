@@ -25,12 +25,11 @@ export function calculateFinalResults(
   const valorImovelFinal = formatNumber(valorInicialImovel * Math.pow(1 + valorizacao, meses / 12));
   const totalInvestidoFinal = formatNumber(detalhes[detalhes.length - 1].investido);
   
-  // MAIN CORRECTION: Standardize capital gain calculation as difference between final property value and purchase price
-  // Instead of using totalInvestidoFinal, we use valorCompra to calculate capital gain
+  // STANDARDIZED: Calculate capital gain as difference between final property value and purchase price
   const ganhoCapital = formatNumber(valorImovelFinal - valorCompra);
   const totalJurosTotal = formatNumber(totalJurosParcelas + totalJurosReforcos);
   
-  // Real gain = capital gain - interest paid
+  // STANDARDIZED: Real gain = capital gain - interest paid
   const ganhoReal = formatNumber(ganhoCapital - totalJurosTotal);
   
   // 5% commission on final value

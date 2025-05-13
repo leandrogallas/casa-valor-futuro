@@ -2,7 +2,7 @@
 import React from "react";
 import { Calculator, PieChart, TrendingUp, DollarSign, PlusCircle, ShieldAlert } from "lucide-react";
 import MetricCard from "./MetricCard";
-import { formatarMoeda } from "@/utils/investmentCalculator";
+import { formatarMoeda } from "@/utils/investment/formatters";
 import { DetalhesMesProcessado } from "@/types/simulador";
 import {
   Tooltip,
@@ -24,6 +24,7 @@ const DetailedMetrics: React.FC<DetailedMetricsProps> = ({
   totalParcelas,
   totalReforcos
 }) => {
+  // We're using the processed data from latestData which has the standardized calculations
   return (
     <>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

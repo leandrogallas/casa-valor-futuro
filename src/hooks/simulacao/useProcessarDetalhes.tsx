@@ -41,8 +41,8 @@ export function useProcessarDetalhes() {
         ? processados[index - 1].jurosPagos + jurosMesPago 
         : jurosMesPago;
       
-      // 5. Juros do reforço no mês atual (se houver) - CORRIGIDO
-      // IMPORTANTE: Esta é a fórmula corrigida para cálculo dos juros de reforço
+      // 5. Juros do reforço no mês atual (CORREÇÃO)
+      // STANDARDIZED FORMULA: Calculate interest as difference between corrected value and original value
       const jurosReforcoMesPago = mes.temReforco 
         ? ((valorReforcoSemCorrecao * indiceCub) - valorReforcoSemCorrecao)
         : 0;
@@ -83,7 +83,7 @@ export function useProcessarDetalhes() {
         lucroLiquidoComComissao,
         valorizacaoPrevista,
         temReforco: mes.temReforco,
-        valorCubAtual: mes.valorCubAtual || 0, // Was using dados.cubInicial
+        valorCubAtual: mes.valorCubAtual || 0,
         indiceCubMensal: mes.indiceCubMensal || 1
       });
     });

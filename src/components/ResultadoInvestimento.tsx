@@ -58,7 +58,7 @@ const ResultadoInvestimento: React.FC<ResultadoInvestimentoProps> = ({ resultado
         ? detalhesProcessed[index - 1].jurosPagos + jurosMesPago 
         : jurosMesPago;
       
-      // 5. Juros de reforço no mês - PADRONIZADO
+      // 5. Juros de reforço no mês - PADRONIZADO CORRIGIDO
       const jurosReforcoMesPago = mes.temReforco 
         ? ((valorReforcoSemCorrecao * indiceCub) - valorReforcoSemCorrecao)
         : 0;

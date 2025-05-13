@@ -56,9 +56,7 @@ export function processMonthlyDetails(
     // Annual adjustment of payment and reinforcement based on CUB (every 12 months)
     if (i > 1 && (i - 1) % 12 === 0) {
       // Apply annual correction based on CUB
-      const indiceCubAnual = cubAtual / cubInicial;
-      parcelaMensalAtual = parcelaMensalInicial * indiceCubAnual;
-      reforcoAnualAtual = reforcoAnualInicial * indiceCubAnual;
+      parcelaMensalAtual = parcelaMensalInicial * indiceCub;
       
       // Calculate interest as difference between corrected value and original value
       const jurosParcela = parcelaMensalAtual - parcelaMensalInicial;
@@ -90,7 +88,7 @@ export function processMonthlyDetails(
       // Calculate CUB-corrected reinforcement
       const reforcoCubCorrigido = reforcoAnualInicial * indiceCub;
       
-      // Calculate interest as difference between corrected value and original value
+      // STANDARDIZED FORMULA: Calculate interest as difference between corrected value and original value
       const jurosReforco = reforcoCubCorrigido - reforcoAnualInicial;
       totalJurosReforcos += jurosReforco;
       
