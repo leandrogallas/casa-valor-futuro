@@ -18,6 +18,12 @@ Equipes que operam com agentes de IA hoje os tratam como caixa-preta: chama-se u
 
 ## Quickstart
 
+### Ver o demo agora (sem instalar nada)
+
+Abra `demo/index.html` no seu navegador (ou rode `python3 -m http.server` na pasta `demo/`). É uma demonstração visual standalone com Phaser via CDN: 6 salas, 1 avatar humano controlável e 3 agentes IA com roteiros pré-programados que ilustram tarefas, tool calls e mensagens A2A. Detalhes em [`demo/README.md`](demo/README.md).
+
+### Rodar o scaffold do monorepo
+
 Pré-requisitos: Node **20+**, pnpm **9+**.
 
 ```bash
