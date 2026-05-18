@@ -55,3 +55,55 @@ CREATE TABLE IF NOT EXISTS artefatos (
 
 CREATE INDEX IF NOT EXISTS idx_artefatos_autor_id  ON artefatos(autor_id);
 CREATE INDEX IF NOT EXISTS idx_artefatos_tarefa_id ON artefatos(tarefa_id);
+
+-- Reuniões agendadas (entre agentes e/ou humanos)
+CREATE TABLE IF NOT EXISTS reunioes (
+  id              TEXT PRIMARY KEY,
+  titulo          TEXT NOT NULL,
+  descricao       TEXT NOT NULL DEFAULT '',
+  sala_id         TEXT NOT NULL DEFAULT 'meeting1',
+  inicio_em       TEXT NOT NULL,
+  fim_em          TEXT,
+  organizador_id  TEXT NOT NULL,
+  status          TEXT NOT NULL DEFAULT 'agendada',
+  ata             TEXT NOT NULL DEFAULT '',
+  criado_em       TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS participantes_reuniao (
+  reuniao_id      TEXT NOT NULL REFERENCES reunioes(id) ON DELETE CASCADE,
+  participante_id TEXT NOT NULL,
+  tipo            TEXT NOT NULL DEFAULT 'agente',
+  confirmado      INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (reuniao_id, participante_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_reunioes_status   ON reunioes(status);
+CREATE INDEX IF NOT EXISTS idx_reunioes_inicio   ON reunioes(inicio_em);
+
+-- Relatórios diários dos agentes (check-in / checkout)
+CREATE TABLE IF NOT EXISTS relatorios_diarios (
+  id                   TEXT PRIMARY KEY,
+  agente_id            TEXT NOT NULL REFERENCES agentes(id) ON DELETE CASCADE,
+  data                 TEXT NOT NULL,
+  tipo                 TEXT NOT NULL DEFAULT 'checkout',
+  conteudo             TEXT NOT NULL,
+  tarefas_concluidas   INTEGER NOT NULL DEFAULT 0,
+  tarefas_abertas      INTEGER NOT NULL DEFAULT 0,
+  criado_em            TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_relatorios_agente ON relatorios_diarios(agente_id, data DESC);
+CREATE INDEX IF NOT EXISTS idx_relatorios_data   ON relatorios_diarios(data DESC);
+
+-- Rotina de cada agente (horários de trabalho)
+CREATE TABLE IF NOT EXISTS rotinas (
+  agente_id      TEXT PRIMARY KEY REFERENCES agentes(id) ON DELETE CASCADE,
+  hora_inicio    TEXT NOT NULL DEFAULT '09:00',
+  hora_fim       TEXT NOT NULL DEFAULT '18:00',
+  almoco_inicio  TEXT NOT NULL DEFAULT '12:00',
+  almoco_fim     TEXT NOT NULL DEFAULT '13:00',
+  dias_semana    TEXT NOT NULL DEFAULT '1,2,3,4,5',
+  ativa          INTEGER NOT NULL DEFAULT 1,
+  atualizado_em  TEXT NOT NULL
+);

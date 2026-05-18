@@ -1,6 +1,9 @@
 import { AgenteWorker } from './worker.js';
+import { HermesOrchestrator } from './hermes/orchestrator.js';
 import { iniciarMcpServer } from './mcp/server.js';
 import { criarA2ATransport } from './a2a/transport.js';
+
+export { iniciarMcpServer, criarA2ATransport };
 
 interface ConfiguracaoAgente {
   id: string;
@@ -10,15 +13,28 @@ interface ConfiguracaoAgente {
 }
 
 async function main(): Promise<void> {
-  const agenteId = process.env.AGENT_ID;
   const serverUrl = process.env.SERVER_URL ?? 'http://localhost:2567';
 
-  if (!agenteId) {
-    console.error('[bastiao-agents] AGENT_ID não definido');
-    process.exit(1);
-  }
   if (!process.env.ANTHROPIC_API_KEY) {
     console.error('[bastiao-agents] ANTHROPIC_API_KEY não definido');
+    process.exit(1);
+  }
+
+  // Modo Hermes: orquestra todos os agentes ativos com rotina diária
+  if (process.env.HERMES_MODE === 'true') {
+    const orchestrator = new HermesOrchestrator(serverUrl);
+    await orchestrator.iniciar();
+
+    const encerrar = () => { orchestrator.encerrar(); process.exit(0); };
+    process.on('SIGTERM', encerrar);
+    process.on('SIGINT', encerrar);
+    return;
+  }
+
+  // Modo agente único (AGENT_ID obrigatório)
+  const agenteId = process.env.AGENT_ID;
+  if (!agenteId) {
+    console.error('[bastiao-agents] defina AGENT_ID ou use HERMES_MODE=true');
     process.exit(1);
   }
 
@@ -40,17 +56,9 @@ async function main(): Promise<void> {
   await worker.iniciar();
   console.log(`[bastiao-agents] agente "${agente.nome}" conectado ao escritório`);
 
-  process.on('SIGTERM', () => {
-    worker.encerrar();
-    process.exit(0);
-  });
-  process.on('SIGINT', () => {
-    worker.encerrar();
-    process.exit(0);
-  });
+  process.on('SIGTERM', () => { worker.encerrar(); process.exit(0); });
+  process.on('SIGINT', () => { worker.encerrar(); process.exit(0); });
 }
-
-export { iniciarMcpServer, criarA2ATransport };
 
 main().catch((err) => {
   console.error('[bastiao-agents] erro fatal:', err);

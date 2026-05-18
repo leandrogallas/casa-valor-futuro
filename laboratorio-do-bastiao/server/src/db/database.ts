@@ -26,7 +26,23 @@ export function initDb(caminho: string): Database.Database {
   const schemaSql = readFileSync(join(__dirname, 'schema.sql'), 'utf-8');
   db.exec(schemaSql);
 
+  runMigrations(db);
+
   return db;
+}
+
+function runMigrations(db: Database.Database): void {
+  // Safe: SQLite ignora erro se coluna já existe
+  const cols = [
+    `ALTER TABLE agentes ADD COLUMN departamento TEXT NOT NULL DEFAULT 'geral'`,
+    `ALTER TABLE agentes ADD COLUMN skin_avatar TEXT NOT NULL DEFAULT 'agent-default'`,
+    `ALTER TABLE agentes ADD COLUMN desk_x INTEGER NOT NULL DEFAULT 640`,
+    `ALTER TABLE agentes ADD COLUMN desk_y INTEGER NOT NULL DEFAULT 400`,
+    `ALTER TABLE agentes ADD COLUMN ativo INTEGER NOT NULL DEFAULT 1`,
+  ];
+  for (const sql of cols) {
+    try { db.exec(sql); } catch { /* coluna já existe */ }
+  }
 }
 
 export function closeDb(): void {

@@ -43,6 +43,10 @@ export class AgenteWorker {
     });
   }
 
+  enviarMensagem(texto: string, salaId = 'recepcao'): void {
+    this.colyseus.enviarMensagem(texto, salaId);
+  }
+
   encerrar(): void {
     this.colyseus.desconectar();
   }

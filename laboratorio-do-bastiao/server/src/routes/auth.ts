@@ -40,5 +40,11 @@ export function criarRotasAuth(jwtSecret: string): Router {
     res.json({ token, usuario });
   });
 
+  router.get('/usuarios', (_req, res) => {
+    const db = getDb();
+    const lista = db.prepare('SELECT id, nome, email FROM usuarios ORDER BY nome').all();
+    res.json(lista);
+  });
+
   return router;
 }
