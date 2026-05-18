@@ -1,22 +1,72 @@
-// Sala Colyseus que representa um andar inteiro do escritório.
-// Stub: ciclo de vida placeholder. Quando colyseus estiver instalado, esta classe
-// passa a estender Room<OfficeState> e implementar onCreate/onJoin/onLeave/onMessage.
-import { OfficeState } from './schema/OfficeState.js';
+import { Room, Client } from 'colyseus';
+import { OfficeState, JogadorState } from './schema/OfficeState.js';
+import { escreverAuditEvent } from '../db/auditLog.js';
 
-export class OfficeRoom {
-  static readonly nome = 'office_room';
-  state = new OfficeState();
+const BOUNDS = { x: [0, 3000], y: [0, 3000] } as const;
+
+interface MoveMsg {
+  x: number;
+  y: number;
+}
+
+interface ChatMsg {
+  texto: string;
+  salaId: string;
+}
+
+export class OfficeRoom extends Room<OfficeState> {
+  static readonly NOME = 'office_room';
 
   onCreate(_opcoes: Record<string, unknown>): void {
-    // futuro: this.setState(new OfficeState());
-    //         this.onMessage('move', (client, msg) => { ... })
+    this.setState(new OfficeState());
+
+    this.onMessage<MoveMsg>('move', (client, msg) => {
+      const jogador = this.state.jogadores.get(client.sessionId);
+      if (!jogador) return;
+      jogador.x = Math.max(BOUNDS.x[0], Math.min(msg.x, BOUNDS.x[1]));
+      jogador.y = Math.max(BOUNDS.y[0], Math.min(msg.y, BOUNDS.y[1]));
+    });
+
+    this.onMessage<ChatMsg>('chat', (client, msg) => {
+      const jogador = this.state.jogadores.get(client.sessionId);
+      const autorNome = jogador?.nome ?? 'Anônimo';
+      escreverAuditEvent({
+        tipo: 'chat',
+        atorId: client.sessionId,
+        payload: { texto: msg.texto, salaId: msg.salaId, autorNome },
+      });
+      this.broadcast('chat', {
+        autorId: client.sessionId,
+        autorNome,
+        texto: msg.texto,
+        salaId: msg.salaId,
+      });
+    });
   }
 
-  onJoin(_clientId: string, _opcoes: Record<string, unknown>): void {
-    // futuro: registrar jogador no this.state.jogadores
+  onJoin(client: Client, opcoes: { nome?: string; userId?: string } = {}): void {
+    const jogador = new JogadorState();
+    jogador.id = opcoes.userId ?? client.sessionId;
+    jogador.nome = opcoes.nome ?? 'Anônimo';
+    jogador.x = 100;
+    jogador.y = 100;
+    jogador.salaAtualId = 'recepcao';
+    this.state.jogadores.set(client.sessionId, jogador);
+
+    escreverAuditEvent({
+      tipo: 'jogador_entrou',
+      atorId: jogador.id,
+      payload: { nome: jogador.nome, sessionId: client.sessionId },
+    });
   }
 
-  onLeave(_clientId: string): void {
-    // futuro: remover jogador
+  onLeave(client: Client): void {
+    const jogador = this.state.jogadores.get(client.sessionId);
+    escreverAuditEvent({
+      tipo: 'jogador_saiu',
+      atorId: jogador?.id ?? client.sessionId,
+      payload: { sessionId: client.sessionId },
+    });
+    this.state.jogadores.delete(client.sessionId);
   }
 }
