@@ -5,7 +5,7 @@ WORKDIR /app
 RUN apk add --no-cache git && npm install -g pnpm@9 --quiet
 
 # Copy workspace manifests so pnpm understands the monorepo layout
-COPY pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json package.json ./
 COPY shared/package.json ./shared/
 COPY server/package.json ./server/
 COPY agents/package.json ./agents/

@@ -9,12 +9,12 @@ import { detectarSala, nomeSala, SALAS } from '../logic/zones.js';
 import { FRAME_W, FRAME_H } from './PreloadScene.js';
 import type { UsuarioAuth } from '../net/colyseusClient.js';
 
-// Landscape layout: canvas 960×600 @ zoom 0.75 → world 1280×800 fully visible
+// Canvas 960×600 @ zoom 0.75 → viewport 1280×800 = world inteiro visível
 const WORLD_W = 1280;
 const WORLD_H = 800;
 const CAMERA_ZOOM = 0.75;
-const PLAYER_SPEED = 280;
-const MOVE_SEND_INTERVAL = 80; // ms
+const PLAYER_SPEED = 260;
+const MOVE_SEND_INTERVAL = 80;
 
 const IDLE_FRAME: Record<string, number> = { down: 0, left: 4, right: 8, up: 12 };
 
@@ -25,9 +25,11 @@ const LIMITES = {
   maxY: WORLD_H - FRAME_H / 2,
 };
 
-const SPAWN = { x: 960, y: 680 }; // center of reception
+// Spawn no centro da Recepção (col 1, y=260..800)
+const SPAWN = { x: 197, y: 530 };
 
-const COR_SALA: Record<string, number> = {
+// Tint sutil por sala (sem cobrir o mapa real)
+const TINT_SALA: Record<string, number> = {
   meeting1:  0x378ADD,
   meeting2:  0x4a9de0,
   executive: 0x7B4A4A,
@@ -95,7 +97,7 @@ export class OfficeScene extends Phaser.Scene {
 
     this.desenharMapa();
 
-    this.playerRing = this.add.circle(this.playerX, this.playerY, FRAME_W * 0.55, 0x97C459, 0.3).setDepth(9);
+    this.playerRing = this.add.circle(this.playerX, this.playerY, FRAME_W * 0.55, 0x97C459, 0.35).setDepth(9);
     this.playerSprite = this.add.sprite(this.playerX, this.playerY, 'avatar-human', 0).setDepth(10);
     this.playerLabel = this.add
       .text(this.playerX, this.playerY - FRAME_H * 0.65, this.usuario?.nome ?? '?', {
@@ -214,7 +216,7 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private adicionarOutroJogador(sessionId: string, jogador: JogadorState): void {
-    const ring = this.add.circle(jogador.x, jogador.y, FRAME_W * 0.55, 0x51cf66, 0.28).setDepth(9);
+    const ring = this.add.circle(jogador.x, jogador.y, FRAME_W * 0.55, 0x51cf66, 0.3).setDepth(9);
     const sprite = this.add.sprite(jogador.x, jogador.y, 'avatar-human', 0).setDepth(10);
     const label = this.add
       .text(jogador.x, jogador.y - FRAME_H * 0.65, jogador.nome, {
@@ -227,58 +229,24 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private desenharMapa(): void {
-    const g = this.add.graphics().setDepth(0);
-    const W = 6; // wall strip width
+    // Fundo: mapa pixel-art landscape (SVG portrait rotacionado 90° CW)
+    this.add.image(WORLD_W / 2, WORLD_H / 2, 'map-bg').setDepth(0);
 
-    // Base background
-    g.fillStyle(0x13141c, 1);
-    g.fillRect(0, 0, WORLD_W, WORLD_H);
-
-    // Subtle tile grid
-    g.lineStyle(1, 0x1c1d2a, 1);
-    for (let x = 0; x <= WORLD_W; x += 32) g.lineBetween(x, 0, x, WORLD_H);
-    for (let y = 0; y <= WORLD_H; y += 32) g.lineBetween(0, y, WORLD_W, y);
-
-    // Room fills + inner border
+    // Overlay bem sutil: só para demarcar salas visualmente
+    const g = this.add.graphics().setDepth(1).setAlpha(0.07);
     for (const sala of SALAS) {
-      const cor = COR_SALA[sala.id] ?? 0x334455;
-      g.fillStyle(cor, 0.14);
-      g.fillRect(sala.x + W, sala.y + W, sala.w - W * 2, sala.h - W * 2);
-      g.lineStyle(2, cor, 0.5);
-      g.strokeRect(sala.x + W, sala.y + W, sala.w - W * 2, sala.h - W * 2);
+      const cor = TINT_SALA[sala.id] ?? 0x334455;
+      g.fillStyle(cor, 1);
+      g.fillRect(sala.x + 4, sala.y + 4, sala.w - 8, sala.h - 8);
     }
 
-    // Wall strips (opaque dark)
-    g.fillStyle(0x090a10, 1);
-    // Horizontal walls
-    g.fillRect(0, 280 - W / 2, WORLD_W, W);
-    g.fillRect(0, 560 - W / 2, WORLD_W, W);
-    // Row 1 verticals
-    g.fillRect(426 - W / 2, 0,   W, 280);
-    g.fillRect(853 - W / 2, 0,   W, 280);
-    // Row 2 verticals (256px cols)
-    for (let x = 256; x < WORLD_W; x += 256) g.fillRect(x - W / 2, 280, W, 280);
-    // Row 3 verticals
-    g.fillRect(320 - W / 2, 560, W, 240);
-    g.fillRect(640 - W / 2, 560, W, 240);
-
-    // Room labels (centered vertically)
+    // Nomes das salas com sombra
     for (const sala of SALAS) {
-      this.add.text(sala.x + sala.w / 2, sala.y + sala.h / 2 - 8, sala.nome, {
-        fontSize: '14px', color: '#ffffffcc', fontStyle: 'bold',
-        stroke: '#00000099', strokeThickness: 4,
+      this.add.text(sala.x + sala.w / 2, sala.y + 18, sala.nome, {
+        fontSize: '11px', color: '#ffffffdd', fontStyle: 'bold',
+        stroke: '#000000bb', strokeThickness: 4,
       }).setOrigin(0.5).setDepth(2);
     }
-
-    // Spawn indicator at reception
-    const sg = this.add.graphics().setDepth(1);
-    sg.fillStyle(0xffffff, 0.06);
-    sg.fillCircle(SPAWN.x, SPAWN.y, 40);
-    sg.lineStyle(1, 0xffffff, 0.2);
-    sg.strokeCircle(SPAWN.x, SPAWN.y, 40);
-    this.add.text(SPAWN.x, SPAWN.y + 52, '⬇ Entrada', {
-      fontSize: '10px', color: '#ffffff88',
-    }).setOrigin(0.5).setDepth(2);
   }
 
   private configurarMinimap(): void {

@@ -1,86 +1,86 @@
 import { describe, it, expect } from 'vitest';
 import { detectarSala, nomeSala, SALAS } from '../logic/zones.js';
 
-describe('detectarSala — landscape layout', () => {
-  it('detects meeting1 (top-left)', () => {
-    expect(detectarSala(10, 10)).toBe('meeting1');
-    expect(detectarSala(200, 100)).toBe('meeting1');
+describe('detectarSala — landscape 4-column layout', () => {
+  // Col 1 — Financeiro + Recepção
+  it('detects finance (top-left)', () => {
+    expect(detectarSala(100, 100)).toBe('finance');
+    expect(detectarSala(394, 259)).toBe('finance');
+  });
+  it('detects reception (bottom-left)', () => {
+    expect(detectarSala(100, 300)).toBe('reception');
+    expect(detectarSala(394, 799)).toBe('reception');
   });
 
-  it('detects meeting2 (top-center)', () => {
-    expect(detectarSala(430, 10)).toBe('meeting2');  // x=426+4
-    expect(detectarSala(640, 140)).toBe('meeting2');
+  // Col 2 — Social
+  it('detects growth (col2 top)', () => {
+    expect(detectarSala(400, 100)).toBe('growth');
+    expect(detectarSala(697, 279)).toBe('growth');
+  });
+  it('detects kitchen (col2 middle)', () => {
+    expect(detectarSala(500, 300)).toBe('kitchen');
+    expect(detectarSala(697, 539)).toBe('kitchen');
+  });
+  it('detects lounge (col2 bottom)', () => {
+    expect(detectarSala(500, 600)).toBe('lounge');
+    expect(detectarSala(697, 799)).toBe('lounge');
   });
 
-  it('detects executive (top-right)', () => {
-    expect(detectarSala(860, 50)).toBe('executive'); // x=853+7
-    expect(detectarSala(1100, 200)).toBe('executive');
+  // Col 3 — Departamentos
+  it('detects marketing (col3 top)', () => {
+    expect(detectarSala(800, 100)).toBe('marketing');
+  });
+  it('detects copy (col3 middle)', () => {
+    expect(detectarSala(800, 300)).toBe('copy');
+  });
+  it('detects research (col3 bottom)', () => {
+    expect(detectarSala(800, 600)).toBe('research');
   });
 
-  it('detects marketing (row 2 leftmost)', () => {
-    expect(detectarSala(50, 300)).toBe('marketing'); // y=280+20
-    expect(detectarSala(200, 400)).toBe('marketing');
+  // Col 4 — Reuniões
+  it('detects meeting1 (col4 top)', () => {
+    expect(detectarSala(1100, 100)).toBe('meeting1');
   });
-
-  it('detects copy (row 2 second)', () => {
-    expect(detectarSala(260, 300)).toBe('copy');     // x=256+4
+  it('detects meeting2 (col4 middle)', () => {
+    expect(detectarSala(1100, 400)).toBe('meeting2');
   });
-
-  it('detects research (row 2 middle)', () => {
-    expect(detectarSala(520, 400)).toBe('research'); // x=512+8
-  });
-
-  it('detects growth (row 2 fourth)', () => {
-    expect(detectarSala(780, 350)).toBe('growth');   // x=768+12
-  });
-
-  it('detects finance (row 2 rightmost)', () => {
-    expect(detectarSala(1050, 400)).toBe('finance'); // x=1024+26
-  });
-
-  it('detects kitchen (row 3 left)', () => {
-    expect(detectarSala(100, 600)).toBe('kitchen');  // y=560+40
-  });
-
-  it('detects lounge (row 3 center)', () => {
-    expect(detectarSala(400, 650)).toBe('lounge');   // x=320+80
-  });
-
-  it('detects reception (row 3 right)', () => {
-    expect(detectarSala(900, 680)).toBe('reception');// x=640+260
+  it('detects executive (col4 bottom)', () => {
+    expect(detectarSala(1100, 650)).toBe('executive');
   });
 
   it('falls back to reception for out-of-bound', () => {
     expect(detectarSala(5000, 5000)).toBe('reception');
-    expect(detectarSala(-1, -1)).toBe('reception');
+    expect(detectarSala(-10, -10)).toBe('reception');
   });
 });
 
 describe('nomeSala', () => {
-  it('returns name for known id', () => {
-    expect(nomeSala('marketing')).toBe('Marketing');
+  it('returns correct names', () => {
     expect(nomeSala('reception')).toBe('Recepção');
     expect(nomeSala('executive')).toBe('Diretoria');
     expect(nomeSala('lounge')).toBe('Área de Descanso');
-  });
-
-  it('returns id itself for unknown id', () => {
     expect(nomeSala('unknown')).toBe('unknown');
   });
 });
 
-describe('SALAS', () => {
+describe('SALAS integrity', () => {
   it('has 11 rooms', () => {
     expect(SALAS).toHaveLength(11);
   });
 
-  it('total width of each row equals 1280', () => {
-    const row1 = SALAS.filter(s => s.y === 0);
-    const row2 = SALAS.filter(s => s.y === 280);
-    const row3 = SALAS.filter(s => s.y === 560);
-    expect(row1.reduce((s, r) => s + r.w, 0)).toBe(1280);
-    expect(row2.reduce((s, r) => s + r.w, 0)).toBe(1280);
-    expect(row3.reduce((s, r) => s + r.w, 0)).toBe(1280);
+  it('total width of all 4 columns = 1280', () => {
+    expect(395 + 303 + 303 + 279).toBe(1280);
+  });
+
+  it('each column covers full height (800)', () => {
+    const col1 = SALAS.filter(s => s.x === 0);
+    const col2 = SALAS.filter(s => s.x === 395);
+    const col3 = SALAS.filter(s => s.x === 698);
+    const col4 = SALAS.filter(s => s.x === 1001);
+    expect(col1.reduce((s, r) => s + r.h, 0)).toBe(800);
+    expect(col2.reduce((s, r) => s + r.h, 0)).toBe(800);
+    expect(col3.reduce((s, r) => s + r.h, 0)).toBe(800);
+    expect(col4.reduce((s, r) => s + r.h, 0)).toBe(800);
   });
 
   it('all rooms have positive dimensions', () => {

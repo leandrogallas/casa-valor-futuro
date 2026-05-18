@@ -2,9 +2,9 @@
 FROM node:24-alpine AS build
 WORKDIR /app
 
-RUN corepack enable
+RUN npm install -g pnpm@9 --quiet
 
-COPY pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json package.json ./
 COPY shared/package.json ./shared/
 COPY client/package.json ./client/
 COPY server/package.json ./server/
