@@ -5,49 +5,60 @@ import { OfficeState, JogadorState } from '../schema/OfficeState.js';
 import { ChatOverlay } from '../ui/ChatOverlay.js';
 import { TaskBoardOverlay } from '../ui/TaskBoardOverlay.js';
 import { calcularVelocidade, aplicarMovimento } from '../logic/movement.js';
+import { detectarSala, nomeSala, SALAS } from '../logic/zones.js';
+import { FRAME_W, FRAME_H } from './PreloadScene.js';
 import type { UsuarioAuth } from '../net/colyseusClient.js';
 
-const WORLD_W = 800;
-const WORLD_H = 800;
-const PLAYER_SPEED = 200;
-const MOVE_SEND_INTERVAL = 80; // ms entre envios de posição ao servidor
+const WORLD_W = 1280;
+const WORLD_H = 1760;
+const PLAYER_SPEED = 320;
+const MOVE_SEND_INTERVAL = 80; // ms
+const CAMERA_ZOOM = 1.5;
 
-interface ZonaSala {
-  id: string;
-  nome: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  cor: number;
-}
+// Idle frame index per direction (first frame of each animation row)
+const IDLE_FRAME: Record<string, number> = { down: 0, left: 4, right: 8, up: 12 };
 
-const SALAS: ZonaSala[] = [
-  { id: 'recepcao',   nome: 'Recepção',   x: 0,   y: 0,   w: 800, h: 220, cor: 0x1e3a5f },
-  { id: 'marketing',  nome: 'Marketing',  x: 0,   y: 220, w: 400, h: 280, cor: 0x1e5f3a },
-  { id: 'financeiro', nome: 'Financeiro', x: 400, y: 220, w: 400, h: 280, cor: 0x5f3a1e },
-  { id: 'reuniao',    nome: 'Reunião',    x: 0,   y: 500, w: 800, h: 300, cor: 0x3a1e5f },
-];
+const LIMITES = { minX: FRAME_W / 2, maxX: WORLD_W - FRAME_W / 2, minY: FRAME_H / 2, maxY: WORLD_H - FRAME_H / 2 };
 
-const LIMITES = { minX: 16, maxX: WORLD_W - 16, minY: 16, maxY: WORLD_H - 16 };
+// Cores de destaque por sala
+const COR_SALA: Record<string, number> = {
+  meeting1:  0x378ADD,
+  meeting2:  0x378ADD,
+  executive: 0x7B4A4A,
+  marketing: 0xD85A30,
+  copy:      0xBA7517,
+  research:  0x639922,
+  growth:    0x378ADD,
+  finance:   0x854F0B,
+  kitchen:   0x5A5258,
+  lounge:    0x7F77DD,
+  reception: 0x8B6F47,
+};
 
 export class OfficeScene extends Phaser.Scene {
   static readonly key = 'OfficeScene';
 
   private room!: Room<OfficeState>;
-  private playerX = 400;
-  private playerY = 100;
+  private playerX = 640;
+  private playerY = 1400;
   private playerSessionId = '';
   private usuario!: UsuarioAuth;
+  private direcao: string = 'down';
+  private movendo = false;
 
-  private playerSprite!: Phaser.GameObjects.Image;
+  private playerSprite!: Phaser.GameObjects.Sprite;
   private playerLabel!: Phaser.GameObjects.Text;
-  private outrosJogadores = new Map<string, { sprite: Phaser.GameObjects.Image; label: Phaser.GameObjects.Text }>();
+  private playerRing!: Phaser.GameObjects.Arc;
+  private outrosJogadores = new Map<string, {
+    sprite: Phaser.GameObjects.Sprite;
+    label: Phaser.GameObjects.Text;
+    ring: Phaser.GameObjects.Arc;
+  }>();
 
   private wasd!: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key };
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private tempoUltimoEnvio = 0;
-  private salaAtual = 'recepcao';
+  private salaAtual = 'reception';
 
   private chat!: ChatOverlay;
   private taskBoard!: TaskBoardOverlay;
@@ -71,14 +82,17 @@ export class OfficeScene extends Phaser.Scene {
 
   create(): void {
     this.cameras.main.setBounds(0, 0, WORLD_W, WORLD_H);
+    this.cameras.main.setZoom(CAMERA_ZOOM);
     this.cameras.main.setBackgroundColor(0x0d0e12);
 
     this.desenharMapa();
 
-    this.playerSprite = this.add.image(this.playerX, this.playerY, 'avatar-self').setDepth(10);
+    this.playerRing = this.add.circle(this.playerX, this.playerY, FRAME_W * 0.55, 0x97C459, 0.35).setDepth(9);
+    this.playerSprite = this.add.sprite(this.playerX, this.playerY, 'avatar-human', 0).setDepth(10);
     this.playerLabel = this.add
-      .text(this.playerX, this.playerY - 24, this.usuario?.nome ?? '?', {
-        fontSize: '11px', color: '#ffffff', stroke: '#000000', strokeThickness: 2,
+      .text(this.playerX, this.playerY - FRAME_H * 0.7, this.usuario?.nome ?? '?', {
+        fontSize: '10px', color: '#ffffff', stroke: '#000000', strokeThickness: 3,
+        backgroundColor: '#00000066', padding: { x: 3, y: 1 },
       })
       .setOrigin(0.5)
       .setDepth(11);
@@ -105,25 +119,42 @@ export class OfficeScene extends Phaser.Scene {
     };
 
     const { vx, vy } = calcularVelocidade(keys, PLAYER_SPEED);
+    const movendo = vx !== 0 || vy !== 0;
 
-    if (vx !== 0 || vy !== 0) {
+    if (movendo) {
       const pos = aplicarMovimento(this.playerX, this.playerY, vx, vy, delta, LIMITES);
       this.playerX = pos.x;
       this.playerY = pos.y;
+
+      if (vy > 0) this.direcao = 'down';
+      else if (vy < 0) this.direcao = 'up';
+      else if (vx > 0) this.direcao = 'right';
+      else this.direcao = 'left';
+    }
+
+    if (movendo !== this.movendo || movendo) {
+      if (movendo) {
+        this.playerSprite.anims.play(`walk-${this.direcao}`, true);
+      } else {
+        this.playerSprite.anims.stop();
+        this.playerSprite.setFrame(IDLE_FRAME[this.direcao] ?? 0);
+      }
+      this.movendo = movendo;
     }
 
     this.playerSprite.setPosition(this.playerX, this.playerY);
-    this.playerLabel.setPosition(this.playerX, this.playerY - 24);
+    this.playerLabel.setPosition(this.playerX, this.playerY - FRAME_H * 0.7);
+    this.playerRing.setPosition(this.playerX, this.playerY);
 
-    const novaSala = this.detectarSala(this.playerX, this.playerY);
+    const novaSala = detectarSala(this.playerX, this.playerY);
     if (novaSala !== this.salaAtual) {
       this.salaAtual = novaSala;
-      this.chat.setSala(novaSala);
+      this.chat.setSala(nomeSala(novaSala));
     }
 
     this.tempoUltimoEnvio += delta;
-    if ((vx !== 0 || vy !== 0) && this.tempoUltimoEnvio >= MOVE_SEND_INTERVAL) {
-      enviarMovimento(Math.round(this.playerX), Math.round(this.playerY));
+    if (movendo && this.tempoUltimoEnvio >= MOVE_SEND_INTERVAL) {
+      enviarMovimento(Math.round(this.playerX), Math.round(this.playerY), this.direcao);
       this.tempoUltimoEnvio = 0;
     }
   }
@@ -134,7 +165,6 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private configurarColyseus(): void {
-    // Usa any para compatibilidade com @colyseus/schema v3 callbacks
     const jogadores = this.room.state.jogadores as unknown as {
       onAdd: (cb: (item: JogadorState, key: string) => void) => void;
       onRemove: (cb: (item: JogadorState, key: string) => void) => void;
@@ -144,16 +174,20 @@ export class OfficeScene extends Phaser.Scene {
       if (sessionId === this.playerSessionId) return;
       this.adicionarOutroJogador(sessionId, jogador);
 
-      const schemaJogador = jogador as unknown as {
-        listen: (prop: string, cb: (val: number) => void) => void;
+      const j = jogador as unknown as {
+        listen: (prop: string, cb: (val: number | string) => void) => void;
       };
-      schemaJogador.listen('x', (val) => {
-        this.outrosJogadores.get(sessionId)?.sprite.setX(val);
-        this.outrosJogadores.get(sessionId)?.label.setX(val);
+      j.listen('x', (val) => {
+        const obj = this.outrosJogadores.get(sessionId);
+        if (obj) { obj.sprite.setX(val as number); obj.ring.setX(val as number); obj.label.setX(val as number); }
       });
-      schemaJogador.listen('y', (val) => {
-        this.outrosJogadores.get(sessionId)?.sprite.setY(val);
-        this.outrosJogadores.get(sessionId)?.label.setY(val - 24);
+      j.listen('y', (val) => {
+        const obj = this.outrosJogadores.get(sessionId);
+        if (obj) { obj.sprite.setY(val as number); obj.ring.setY(val as number); obj.label.setY((val as number) - FRAME_H * 0.7); }
+      });
+      j.listen('direcao', (val) => {
+        const obj = this.outrosJogadores.get(sessionId);
+        if (obj) obj.sprite.setFrame(IDLE_FRAME[val as string] ?? 0);
       });
     });
 
@@ -162,6 +196,7 @@ export class OfficeScene extends Phaser.Scene {
       if (obj) {
         obj.sprite.destroy();
         obj.label.destroy();
+        obj.ring.destroy();
         this.outrosJogadores.delete(sessionId);
       }
     });
@@ -172,47 +207,55 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private adicionarOutroJogador(sessionId: string, jogador: JogadorState): void {
-    const textureKey = 'avatar-outro';
-    const sprite = this.add.image(jogador.x, jogador.y, textureKey).setDepth(10);
+    const ring = this.add.circle(jogador.x, jogador.y, FRAME_W * 0.55, 0x51cf66, 0.3).setDepth(9);
+    const sprite = this.add.sprite(jogador.x, jogador.y, 'avatar-human', 0).setDepth(10);
     const label = this.add
-      .text(jogador.x, jogador.y - 24, jogador.nome, {
-        fontSize: '11px', color: '#cccccc', stroke: '#000000', strokeThickness: 2,
+      .text(jogador.x, jogador.y - FRAME_H * 0.7, jogador.nome, {
+        fontSize: '10px', color: '#cccccc', stroke: '#000000', strokeThickness: 3,
+        backgroundColor: '#00000066', padding: { x: 3, y: 1 },
       })
       .setOrigin(0.5)
       .setDepth(11);
-    this.outrosJogadores.set(sessionId, { sprite, label });
+    this.outrosJogadores.set(sessionId, { sprite, label, ring });
   }
 
   private desenharMapa(): void {
-    const g = this.add.graphics();
-    for (const sala of SALAS) {
-      g.fillStyle(sala.cor, 1);
-      g.fillRect(sala.x, sala.y, sala.w, sala.h);
-      g.lineStyle(2, 0x2a2a4a, 1);
-      g.strokeRect(sala.x, sala.y, sala.w, sala.h);
+    // Mapa pixel-art como fundo
+    this.add.image(WORLD_W / 2, WORLD_H / 2, 'map-bg').setDepth(0);
 
-      this.add.text(sala.x + sala.w / 2, sala.y + 16, sala.nome, {
-        fontSize: '13px', color: '#aaaacc', fontStyle: 'bold',
-      }).setOrigin(0.5).setDepth(1);
+    // Overlay semitransparente com nome de cada zona
+    const g = this.add.graphics().setDepth(1).setAlpha(0.08);
+    for (const sala of SALAS) {
+      const cor = COR_SALA[sala.id] ?? 0x333333;
+      g.fillStyle(cor, 1);
+      g.fillRect(sala.x, sala.y, sala.w, sala.h);
+    }
+
+    // Labels de salas (visíveis ao longe)
+    for (const sala of SALAS) {
+      this.add.text(sala.x + sala.w / 2, sala.y + 14, sala.nome, {
+        fontSize: '9px', color: '#ffffff99', fontStyle: 'bold',
+      }).setOrigin(0.5).setDepth(2);
     }
   }
 
   private configurarMinimap(): void {
-    const mmW = 150;
-    const mmH = 100;
-    const mmX = this.scale.width - mmW - 8;
-    const mmY = 8;
+    const mmW = 160;
+    const mmH = Math.round(mmW * WORLD_H / WORLD_W); // proporcional ao mapa
+    const padding = 8;
+    const mmX = this.scale.width - mmW - padding;
+    const mmY = padding;
     const zoom = mmW / WORLD_W;
 
     const minimap = this.cameras.add(mmX, mmY, mmW, mmH);
     minimap.setZoom(zoom);
     minimap.setBounds(0, 0, WORLD_W, WORLD_H);
-    minimap.setBackgroundColor(0x111122);
-    minimap.startFollow(this.playerSprite, true, 0, 0);
-    minimap.setAlpha(0.85);
+    minimap.setBackgroundColor(0x0d0e12);
+    minimap.startFollow(this.playerSprite, false, 0, 0);
+    minimap.setAlpha(0.9);
 
     const border = this.add.graphics();
-    border.lineStyle(1, 0x4dabf7, 0.8);
+    border.lineStyle(1, 0x4dabf7, 0.7);
     border.strokeRect(mmX, mmY, mmW, mmH);
     border.setScrollFactor(0).setDepth(100);
   }
@@ -227,14 +270,5 @@ export class OfficeScene extends Phaser.Scene {
       right: kb.addKey(Phaser.Input.Keyboard.KeyCodes.D),
     };
     kb.addKey(Phaser.Input.Keyboard.KeyCodes.T).on('down', () => this.taskBoard?.toggle());
-  }
-
-  private detectarSala(x: number, y: number): string {
-    for (const sala of SALAS) {
-      if (x >= sala.x && x < sala.x + sala.w && y >= sala.y && y < sala.y + sala.h) {
-        return sala.id;
-      }
-    }
-    return this.salaAtual;
   }
 }

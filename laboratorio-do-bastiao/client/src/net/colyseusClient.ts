@@ -41,8 +41,8 @@ export function desconectar(): void {
   _room = null;
 }
 
-export function enviarMovimento(x: number, y: number): void {
-  _room?.send('move', { x, y });
+export function enviarMovimento(x: number, y: number, direcao: string): void {
+  _room?.send('move', { x, y, direcao });
 }
 
 export function enviarChat(texto: string, salaId: string): void {
