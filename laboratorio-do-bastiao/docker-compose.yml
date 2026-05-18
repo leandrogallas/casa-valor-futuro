@@ -1,10 +1,10 @@
 services:
   server:
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: server/Dockerfile
     ports:
-      - "2567:2567"
+      - "${PORT:-2567}:2567"
     environment:
       PORT: "2567"
       SQLITE_PATH: "/app/data/bastiao.db"
@@ -17,6 +17,40 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 10s
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+      args:
+        # VITE_SERVER_URL is baked into the JS bundle at build time.
+        # For VPS: set to ws://<VPS_IP_OR_DOMAIN>:2567
+        VITE_SERVER_URL: "${VITE_SERVER_URL:-ws://localhost:2567}"
+    ports:
+      - "${CLIENT_PORT:-80}:80"
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Agent worker — one container per agent.
+  # Start with: docker compose --profile agents up -d agent
+  # Requires: AGENT_ID (UUID from POST /agentes) and ANTHROPIC_API_KEY.
+  agent:
+    build:
+      context: .
+      dockerfile: agents/Dockerfile
+    environment:
+      AGENT_ID: "${AGENT_ID}"
+      SERVER_URL: "${SERVER_URL:-http://server:2567}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - agents
 
 volumes:
   bastiao_data:

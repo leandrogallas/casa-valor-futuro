@@ -1,36 +1,37 @@
 # Build context: workspace root (laboratorio-do-bastiao/)
+# Run one container per agent; pass AGENT_ID + ANTHROPIC_API_KEY via env.
 FROM node:24-alpine AS build
 WORKDIR /app
 
 RUN corepack enable
 
-# Copy workspace manifests so pnpm understands the monorepo layout
 COPY pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
 COPY shared/package.json ./shared/
-COPY server/package.json ./server/
 COPY agents/package.json ./agents/
+COPY server/package.json ./server/
 COPY client/package.json ./client/
 COPY e2e/package.json ./e2e/
 
-# Install only server + its workspace dependencies (excludes devDeps of other packages)
-RUN pnpm install --frozen-lockfile --filter @bastiao/server...
+RUN pnpm install --frozen-lockfile --filter @bastiao/agents...
 
-# Copy source (after install so layer cache is preserved on source changes)
 COPY shared/src ./shared/src
 COPY shared/tsconfig.json ./shared/
-COPY server ./server
+COPY agents ./agents
 
-RUN pnpm --filter @bastiao/server run build
+RUN pnpm --filter @bastiao/agents run build
 
 # ── Runtime image ──────────────────────────────────────────────────────────
 FROM node:24-alpine
 WORKDIR /app
 
-COPY --from=build /app/server/dist ./dist
-COPY --from=build /app/server/node_modules ./node_modules
-COPY server/package.json .
-# schema.sql is loaded at runtime to initialise SQLite
-COPY server/src/db/schema.sql ./dist/db/schema.sql
+COPY --from=build /app/agents/dist ./dist
+COPY --from=build /app/agents/node_modules ./node_modules
+COPY agents/package.json .
 
-EXPOSE 2567
+# Required env vars (no defaults — container exits if missing):
+# AGENT_ID, ANTHROPIC_API_KEY
+# Optional:
+# SERVER_URL (default: http://server:2567)
+ENV SERVER_URL=http://server:2567
+
 CMD ["node", "dist/index.js"]
