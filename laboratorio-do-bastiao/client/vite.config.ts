@@ -9,6 +9,15 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    proxy: {
+      '/auth':      'http://localhost:2567',
+      '/agentes':   'http://localhost:2567',
+      '/tarefas':   'http://localhost:2567',
+      '/artefatos': 'http://localhost:2567',
+      '/reunioes':  'http://localhost:2567',
+      '/relatorios':'http://localhost:2567',
+      '/health':    'http://localhost:2567',
+    },
   },
   css: {
     postcss: { plugins: [] },

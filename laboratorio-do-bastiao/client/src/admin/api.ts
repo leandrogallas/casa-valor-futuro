@@ -1,9 +1,5 @@
-// Em produção nginx proxia /agentes, /tarefas, etc. para o server.
-// Em dev local, bate direto no servidor na porta 2567.
-const _raw: string = import.meta.env.VITE_SERVER_URL ?? 'http://localhost:2567';
-export const SERVER = import.meta.env.PROD
-  ? '' // relativo — nginx proxy cuida
-  : _raw.replace(/^ws(s?):\/\//, 'http$1://');
+// Sempre URL relativa: Vite dev proxy e nginx prod ambos roteiam /agentes, /tarefas, etc.
+export const SERVER = '';
 
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
   const opts: RequestInit = { method, headers: { 'Content-Type': 'application/json' } };
