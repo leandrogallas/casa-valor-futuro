@@ -8,14 +8,19 @@
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "echo \"(lint placeholder client)\""
+    "lint": "echo \"(lint placeholder client)\"",
+    "test": "vitest run"
   },
   "dependencies": {
     "@bastiao/shared": "workspace:*",
+    "@colyseus/schema": "^3.0.0",
+    "colyseus.js": "^0.16.0",
     "phaser": "^3.80.0"
   },
   "devDependencies": {
+    "@types/node": "^24.0.0",
     "typescript": "^5.5.0",
-    "vite": "^5.4.0"
+    "vite": "^5.4.0",
+    "vitest": "^2.0.0"
   }
 }
