@@ -4,7 +4,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "jsx": "preserve",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": false
   },
   "include": ["src/**/*"],
   "references": [{ "path": "../shared" }]
