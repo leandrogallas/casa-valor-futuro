@@ -3,3 +3,4 @@ packages:
   - 'server'
   - 'agents'
   - 'shared'
+  - 'e2e'

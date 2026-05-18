@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import { Room } from 'colyseus.js';
-import { conectarOffice, enviarMovimento, enviarChat } from '../net/colyseusClient.js';
+import { conectarOffice, enviarMovimento, enviarChat, REST_URL } from '../net/colyseusClient.js';
 import { OfficeState, JogadorState } from '../schema/OfficeState.js';
 import { ChatOverlay } from '../ui/ChatOverlay.js';
+import { TaskBoardOverlay } from '../ui/TaskBoardOverlay.js';
 import { calcularVelocidade, aplicarMovimento } from '../logic/movement.js';
 import type { UsuarioAuth } from '../net/colyseusClient.js';
 
@@ -49,6 +50,8 @@ export class OfficeScene extends Phaser.Scene {
   private salaAtual = 'recepcao';
 
   private chat!: ChatOverlay;
+  private taskBoard!: TaskBoardOverlay;
+  private token = '';
 
   constructor() {
     super({ key: OfficeScene.key });
@@ -56,6 +59,7 @@ export class OfficeScene extends Phaser.Scene {
 
   init(data: { token: string; usuario: UsuarioAuth }): void {
     this.usuario = data.usuario;
+    this.token = data.token;
     conectarOffice(data.token, data.usuario.nome).then((room) => {
       this.room = room;
       this.playerSessionId = room.sessionId;
@@ -86,6 +90,8 @@ export class OfficeScene extends Phaser.Scene {
 
     this.chat = new ChatOverlay((texto, salaId) => enviarChat(texto, salaId));
     this.chat.setSala(this.salaAtual);
+
+    this.taskBoard = new TaskBoardOverlay(REST_URL, this.token, this.usuario.id);
   }
 
   update(_time: number, delta: number): void {
@@ -124,6 +130,7 @@ export class OfficeScene extends Phaser.Scene {
 
   shutdown(): void {
     this.chat?.destroy();
+    this.taskBoard?.destroy();
   }
 
   private configurarColyseus(): void {
@@ -219,6 +226,7 @@ export class OfficeScene extends Phaser.Scene {
       left:  kb.addKey(Phaser.Input.Keyboard.KeyCodes.A),
       right: kb.addKey(Phaser.Input.Keyboard.KeyCodes.D),
     };
+    kb.addKey(Phaser.Input.Keyboard.KeyCodes.T).on('down', () => this.taskBoard?.toggle());
   }
 
   private detectarSala(x: number, y: number): string {
