@@ -2,7 +2,7 @@ import { Client, Room } from 'colyseus.js';
 import { OfficeState } from '../schema/OfficeState.js';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? 'ws://localhost:2567';
-const REST_URL = SERVER_URL.replace(/^ws/, 'http');
+export const REST_URL = SERVER_URL.replace(/^ws/, 'http');
 
 export interface UsuarioAuth {
   id: string;
