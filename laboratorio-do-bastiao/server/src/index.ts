@@ -8,6 +8,7 @@ import { OfficeRoom } from './rooms/OfficeRoom.js';
 import { criarRotasAuth } from './routes/auth.js';
 import { criarRotasAgentes } from './routes/agentes.js';
 import { criarRotasTarefas } from './routes/tarefas.js';
+import { criarRotasArtefatos } from './routes/artefatos.js';
 
 async function main(): Promise<void> {
   const cfg = carregarConfiguracao();
@@ -21,6 +22,7 @@ async function main(): Promise<void> {
   app.use('/auth', criarRotasAuth(cfg.jwtSecret));
   app.use('/agentes', criarRotasAgentes());
   app.use('/tarefas', criarRotasTarefas());
+  app.use('/artefatos', criarRotasArtefatos());
 
   app.get('/health', (_req, res) => res.json({ ok: true }));
 

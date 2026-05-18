@@ -42,3 +42,16 @@ CREATE INDEX IF NOT EXISTS idx_audit_events_ator_id  ON audit_events(ator_id);
 CREATE INDEX IF NOT EXISTS idx_audit_events_criado_em ON audit_events(criado_em);
 CREATE INDEX IF NOT EXISTS idx_tarefas_status        ON tarefas(status);
 CREATE INDEX IF NOT EXISTS idx_tarefas_responsavel   ON tarefas(responsavel_id);
+
+CREATE TABLE IF NOT EXISTS artefatos (
+  id         TEXT PRIMARY KEY,
+  titulo     TEXT NOT NULL,
+  tipo       TEXT NOT NULL,
+  conteudo   TEXT NOT NULL DEFAULT '',
+  autor_id   TEXT NOT NULL,
+  tarefa_id  TEXT,
+  criado_em  TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_artefatos_autor_id  ON artefatos(autor_id);
+CREATE INDEX IF NOT EXISTS idx_artefatos_tarefa_id ON artefatos(tarefa_id);

@@ -42,6 +42,16 @@ export function criarRotasAgentes(): Router {
     res.status(201).json({ id, nome, cargo, donoId, modelo, estado: 'provisionando' });
   });
 
+  router.get('/:id', (req, res) => {
+    const db = getDb();
+    const agente = db.prepare('SELECT * FROM agentes WHERE id = ?').get(req.params.id);
+    if (!agente) {
+      res.status(404).json({ erro: 'agente não encontrado' });
+      return;
+    }
+    res.json(agente);
+  });
+
   router.get('/', (req, res) => {
     const db = getDb();
     const agentes = db
