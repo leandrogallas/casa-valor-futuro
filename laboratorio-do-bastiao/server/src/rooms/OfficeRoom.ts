@@ -1,4 +1,5 @@
 import { Room, Client } from 'colyseus';
+import { MapSchema } from '@colyseus/schema';
 import { OfficeState, JogadorState } from './schema/OfficeState.js';
 import { escreverAuditEvent } from '../db/auditLog.js';
 
@@ -20,7 +21,10 @@ export class OfficeRoom extends Room<OfficeState> {
   static readonly NOME = 'office_room';
 
   onCreate(_opcoes: Record<string, unknown>): void {
-    this.setState(new OfficeState());
+    const state = new OfficeState();
+    state.predioId = 'predio-principal';
+    state.jogadores = new MapSchema<JogadorState>();
+    this.setState(state);
 
     this.onMessage<MoveMsg>('move', (client, msg) => {
       const jogador = this.state.jogadores.get(client.sessionId);
@@ -49,12 +53,18 @@ export class OfficeRoom extends Room<OfficeState> {
     });
   }
 
-  onJoin(client: Client, opcoes: { nome?: string; userId?: string } = {}): void {
+  onJoin(
+    client: Client,
+    opcoes: { nome?: string; userId?: string; agenteId?: string; skinId?: string; deskX?: number; deskY?: number } = {},
+  ): void {
     const jogador = new JogadorState();
-    jogador.id = opcoes.userId ?? client.sessionId;
+    const isAgent = !!opcoes.agenteId;
+    jogador.id = opcoes.agenteId ?? opcoes.userId ?? client.sessionId;
     jogador.nome = opcoes.nome ?? 'Anônimo';
-    jogador.x = 960;
-    jogador.y = 680;
+    jogador.tipo = isAgent ? 'agent' : 'human';
+    jogador.skinId = opcoes.skinId ?? (isAgent ? 'agent-pink' : 'human-default');
+    jogador.x = opcoes.deskX ?? 960;
+    jogador.y = opcoes.deskY ?? 680;
     jogador.salaAtualId = 'reception';
     jogador.direcao = 'down';
     this.state.jogadores.set(client.sessionId, jogador);

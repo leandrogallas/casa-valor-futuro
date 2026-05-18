@@ -9,6 +9,9 @@ export interface ConfiguracaoWorker {
   modelo: string;
   promptSistema: string;
   serverUrl: string;
+  skinId?: string;
+  deskX?: number;
+  deskY?: number;
   token?: string;
 }
 
@@ -20,6 +23,9 @@ export class AgenteWorker {
       serverUrl: config.serverUrl,
       agenteId: config.agenteId,
       nome: config.nome,
+      skinId: config.skinId,
+      deskX: config.deskX,
+      deskY: config.deskY,
       token: config.token,
     });
   }

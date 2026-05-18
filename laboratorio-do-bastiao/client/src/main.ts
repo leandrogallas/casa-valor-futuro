@@ -1,3 +1,5 @@
+// Legacy entry — index.html now loads login.ts instead of this file.
+// This file is kept for compatibility only; the game runs from office.ts.
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene.js';
 import { PreloadScene } from './scenes/PreloadScene.js';

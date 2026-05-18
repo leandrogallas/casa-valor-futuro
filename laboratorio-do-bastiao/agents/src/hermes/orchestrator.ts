@@ -9,6 +9,9 @@ interface ConfiguracaoAgente {
   modelo: string;
   prompt_sistema: string;
   departamento?: string;
+  skin_avatar?: string;
+  desk_x?: number;
+  desk_y?: number;
   ativo?: number;
 }
 
@@ -44,6 +47,9 @@ export class HermesOrchestrator {
       modelo: agente.modelo,
       promptSistema: agente.prompt_sistema,
       serverUrl: this.serverUrl,
+      skinId: agente.skin_avatar,
+      deskX: agente.desk_x,
+      deskY: agente.desk_y,
     });
 
     try {

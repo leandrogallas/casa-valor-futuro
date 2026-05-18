@@ -5,6 +5,9 @@ export interface AgenteColyseusOpcoes {
   serverUrl: string;
   agenteId: string;
   nome: string;
+  skinId?: string;
+  deskX?: number;
+  deskY?: number;
   token?: string;
 }
 
@@ -21,6 +24,9 @@ export class AgenteColyseusClient {
     this.room = await this.client.joinOrCreate('office_room', {
       agenteId: this.opcoes.agenteId,
       nome: this.opcoes.nome,
+      skinId: this.opcoes.skinId,
+      deskX: this.opcoes.deskX,
+      deskY: this.opcoes.deskY,
       token: this.opcoes.token,
     });
   }

@@ -10,13 +10,15 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/auth':      'http://localhost:2567',
-      '/agentes':   'http://localhost:2567',
-      '/tarefas':   'http://localhost:2567',
-      '/artefatos': 'http://localhost:2567',
-      '/reunioes':  'http://localhost:2567',
-      '/relatorios':'http://localhost:2567',
-      '/health':    'http://localhost:2567',
+      '/auth':         'http://localhost:2567',
+      '/agentes':      'http://localhost:2567',
+      '/tarefas':      'http://localhost:2567',
+      '/artefatos':    'http://localhost:2567',
+      '/reunioes':     'http://localhost:2567',
+      '/relatorios':   'http://localhost:2567',
+      '/health':       'http://localhost:2567',
+      '/a2a':          'http://localhost:2567',
+      '/.well-known':  'http://localhost:2567',
     },
   },
   css: {
@@ -27,8 +29,10 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: {
-        main:  resolve(__dirname, 'index.html'),
-        admin: resolve(__dirname, 'admin.html'),
+        main:   resolve(__dirname, 'index.html'),
+        portal: resolve(__dirname, 'portal.html'),
+        office: resolve(__dirname, 'office.html'),
+        admin:  resolve(__dirname, 'admin.html'),
       },
     },
   },

@@ -9,6 +9,7 @@ services:
       PORT: "2567"
       SQLITE_PATH: "/app/data/bastiao.db"
       JWT_SECRET: "${JWT_SECRET:-dev-secret-change-in-production}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
     volumes:
       - bastiao_data:/app/data
     restart: unless-stopped
@@ -34,7 +35,25 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Agent worker — one container per agent.
+  # Hermes orchestrator — runs ALL active agents simultaneously.
+  # Start with: docker compose --profile hermes up -d hermes
+  # Requires: ANTHROPIC_API_KEY in .env
+  hermes:
+    build:
+      context: .
+      dockerfile: agents/Dockerfile
+    environment:
+      HERMES_MODE: "true"
+      SERVER_URL: "${SERVER_URL:-http://server:2567}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - hermes
+
+  # Agent worker — one container per agent (legacy single-agent mode).
   # Start with: docker compose --profile agents up -d agent
   # Requires: AGENT_ID (UUID from POST /agentes) and ANTHROPIC_API_KEY.
   agent:

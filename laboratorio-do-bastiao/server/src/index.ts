@@ -11,6 +11,7 @@ import { criarRotasTarefas } from './routes/tarefas.js';
 import { criarRotasArtefatos } from './routes/artefatos.js';
 import { criarRotasReunioes } from './routes/reunioes.js';
 import { criarRotasRelatorios } from './routes/relatorios.js';
+import { criarRotasA2A } from './routes/a2a.js';
 
 async function main(): Promise<void> {
   const cfg = carregarConfiguracao();
@@ -34,6 +35,10 @@ async function main(): Promise<void> {
   app.use('/artefatos', criarRotasArtefatos());
   app.use('/reunioes', criarRotasReunioes());
   app.use('/relatorios', criarRotasRelatorios());
+
+  // A2A protocol — mounted at root so /.well-known/agent.json and /a2a/tasks work
+  const a2aRouter = criarRotasA2A();
+  app.use(a2aRouter);
 
   app.get('/health', (_req, res) => res.json({ ok: true }));
 

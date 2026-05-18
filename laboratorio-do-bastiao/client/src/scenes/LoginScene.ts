@@ -9,6 +9,16 @@ export class LoginScene extends Phaser.Scene {
   }
 
   create(): void {
+    const existingToken = sessionStorage.getItem('bastiao_token');
+    const existingUsuario = sessionStorage.getItem('bastiao_usuario');
+    if (existingToken && existingUsuario) {
+      this.scene.start('OfficeScene', {
+        token: existingToken,
+        usuario: JSON.parse(existingUsuario),
+      });
+      return;
+    }
+
     const { width, height } = this.scale;
 
     this.add.rectangle(width / 2, height / 2, width, height, 0x0d0e12);

@@ -1,15 +1,17 @@
 import { Schema, MapSchema, type } from '@colyseus/schema';
 
 export class JogadorState extends Schema {
-  @type('string') id: string = '';
-  @type('string') nome: string = '';
-  @type('number') x: number = 960;
-  @type('number') y: number = 680;
-  @type('string') salaAtualId: string = 'reception';
-  @type('string') direcao: string = 'down';
+  @type('string') declare id: string;
+  @type('string') declare nome: string;
+  @type('number') declare x: number;
+  @type('number') declare y: number;
+  @type('string') declare salaAtualId: string;
+  @type('string') declare direcao: string;
+  @type('string') declare tipo: string;
+  @type('string') declare skinId: string;
 }
 
 export class OfficeState extends Schema {
-  @type('string') predioId: string = 'predio-principal';
-  @type({ map: JogadorState }) jogadores = new MapSchema<JogadorState>();
+  @type('string') declare predioId: string;
+  @type({ map: JogadorState }) declare jogadores: MapSchema<JogadorState>;
 }

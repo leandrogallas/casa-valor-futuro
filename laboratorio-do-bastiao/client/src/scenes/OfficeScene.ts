@@ -12,11 +12,21 @@ import type { UsuarioAuth } from '../net/colyseusClient.js';
 // Canvas 960×600 @ zoom 0.75 → viewport 1280×800 = world inteiro visível
 const WORLD_W = 1280;
 const WORLD_H = 800;
-const CAMERA_ZOOM = 0.75;
+const CAMERA_ZOOM = 0.7;
 const PLAYER_SPEED = 260;
 const MOVE_SEND_INTERVAL = 80;
 
 const IDLE_FRAME: Record<string, number> = { down: 0, left: 4, right: 8, up: 12 };
+
+// frame offset per skin in agent-skins spritesheet (4 rows × 4 frames per skin block)
+const SKIN_OFFSETS: Record<string, number> = {
+  'agent-pink':     0,
+  'agent-orange':  16,
+  'agent-green':   32,
+  'agent-blue':    48,
+  'agent-gold':    64,
+  'agent-burgundy': 80,
+};
 
 const LIMITES = {
   minX: FRAME_W / 2,
@@ -177,27 +187,21 @@ export class OfficeScene extends Phaser.Scene {
     const jogadores = this.room.state.jogadores as unknown as {
       onAdd: (cb: (item: JogadorState, key: string) => void) => void;
       onRemove: (cb: (item: JogadorState, key: string) => void) => void;
+      forEach: (cb: (item: JogadorState, key: string) => void) => void;
     };
+
+    // Render players already in the room at join time (onAdd doesn't fire retroactively)
+    jogadores.forEach((jogador, sessionId) => {
+      if (sessionId === this.playerSessionId) return;
+      this.adicionarOutroJogador(sessionId, jogador);
+      this.configurarListenersJogador(sessionId, jogador);
+    });
 
     jogadores.onAdd((jogador, sessionId) => {
       if (sessionId === this.playerSessionId) return;
+      if (this.outrosJogadores.has(sessionId)) return;
       this.adicionarOutroJogador(sessionId, jogador);
-
-      const j = jogador as unknown as {
-        listen: (prop: string, cb: (val: number | string) => void) => void;
-      };
-      j.listen('x', (val) => {
-        const obj = this.outrosJogadores.get(sessionId);
-        if (obj) { obj.sprite.setX(val as number); obj.ring.setX(val as number); obj.label.setX(val as number); }
-      });
-      j.listen('y', (val) => {
-        const obj = this.outrosJogadores.get(sessionId);
-        if (obj) { obj.sprite.setY(val as number); obj.ring.setY(val as number); obj.label.setY((val as number) - FRAME_H * 0.65); }
-      });
-      j.listen('direcao', (val) => {
-        const obj = this.outrosJogadores.get(sessionId);
-        if (obj) obj.sprite.setFrame(IDLE_FRAME[val as string] ?? 0);
-      });
+      this.configurarListenersJogador(sessionId, jogador);
     });
 
     jogadores.onRemove((_jogador, sessionId) => {
@@ -215,12 +219,44 @@ export class OfficeScene extends Phaser.Scene {
     });
   }
 
+  private configurarListenersJogador(sessionId: string, jogador: JogadorState): void {
+    const j = jogador as unknown as {
+      listen: (prop: string, cb: (val: number | string) => void) => void;
+    };
+    j.listen('x', (val) => {
+      const obj = this.outrosJogadores.get(sessionId);
+      if (obj) { obj.sprite.setX(val as number); obj.ring.setX(val as number); obj.label.setX(val as number); }
+    });
+    j.listen('y', (val) => {
+      const obj = this.outrosJogadores.get(sessionId);
+      if (obj) { obj.sprite.setY(val as number); obj.ring.setY(val as number); obj.label.setY((val as number) - FRAME_H * 0.65); }
+    });
+    j.listen('direcao', (val) => {
+      const obj = this.outrosJogadores.get(sessionId);
+      if (!obj) return;
+      const dirFrame = IDLE_FRAME[val as string] ?? 0;
+      const skinOffset = jogador.tipo === 'agent' ? (SKIN_OFFSETS[jogador.skinId] ?? 0) : 0;
+      obj.sprite.setFrame(skinOffset + dirFrame);
+    });
+  }
+
   private adicionarOutroJogador(sessionId: string, jogador: JogadorState): void {
-    const ring = this.add.circle(jogador.x, jogador.y, FRAME_W * 0.55, 0x51cf66, 0.3).setDepth(9);
-    const sprite = this.add.sprite(jogador.x, jogador.y, 'avatar-human', 0).setDepth(10);
+    const isAgent = jogador.tipo === 'agent';
+    const ringColor = isAgent ? 0x00D4FF : 0x51cf66;
+    const ring = this.add.circle(jogador.x, jogador.y, FRAME_W * 0.55, ringColor, 0.3).setDepth(9);
+
+    let sprite: Phaser.GameObjects.Sprite;
+    if (isAgent) {
+      const offset = SKIN_OFFSETS[jogador.skinId] ?? 0;
+      sprite = this.add.sprite(jogador.x, jogador.y, 'agent-skins', offset).setDepth(10);
+    } else {
+      sprite = this.add.sprite(jogador.x, jogador.y, 'avatar-human', 0).setDepth(10);
+    }
+
+    const labelColor = isAgent ? '#00D4FF' : '#cccccc';
     const label = this.add
       .text(jogador.x, jogador.y - FRAME_H * 0.65, jogador.nome, {
-        fontSize: '11px', color: '#cccccc', stroke: '#000000', strokeThickness: 3,
+        fontSize: '11px', color: labelColor, stroke: '#000000', strokeThickness: 3,
         backgroundColor: '#00000077', padding: { x: 3, y: 1 },
       })
       .setOrigin(0.5)
