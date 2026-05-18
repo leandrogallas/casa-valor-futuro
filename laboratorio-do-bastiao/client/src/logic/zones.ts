@@ -9,22 +9,26 @@ export interface ZonaSala {
   h: number;
 }
 
-// Mapa 40×55 tiles de 16px → 640×880px template → 1280×1760px PNG (density 2)
-// Cada tile no mundo = 32px (16 * 2)
-const T = 32;
+// Layout landscape 1280×800
+// Row 1 (y=0,   h=280): salas privadas / reunião
+// Row 2 (y=280, h=280): departamentos open space
+// Row 3 (y=560, h=240): social + recepção
 
 export const SALAS: ZonaSala[] = [
-  { id: 'meeting1',  nome: 'Sala de Reunião 1', x: 0,      y: 0,      w: 14*T, h: 12*T },
-  { id: 'meeting2',  nome: 'Sala de Reunião 2', x: 14*T,   y: 0,      w: 14*T, h: 12*T },
-  { id: 'executive', nome: 'Diretoria',          x: 28*T,   y: 0,      w: 12*T, h: 12*T },
-  { id: 'marketing', nome: 'Marketing',          x: 0,      y: 13*T,   w: 14*T, h: 12*T },
-  { id: 'copy',      nome: 'Copy',               x: 14*T,   y: 13*T,   w: 13*T, h: 12*T },
-  { id: 'research',  nome: 'Pesquisa',           x: 27*T,   y: 13*T,   w: 13*T, h: 12*T },
-  { id: 'growth',    nome: 'Growth',             x: 0,      y: 26*T,   w: 14*T, h: 12*T },
-  { id: 'kitchen',   nome: 'Copa',               x: 14*T,   y: 26*T,   w: 13*T, h: 12*T },
-  { id: 'lounge',    nome: 'Área de Descanso',  x: 27*T,   y: 26*T,   w: 13*T, h: 12*T },
-  { id: 'finance',   nome: 'Financeiro',         x: 0,      y: 39*T,   w: 13*T, h: 14*T },
-  { id: 'reception', nome: 'Recepção',           x: 13*T,   y: 39*T,   w: 27*T, h: 14*T },
+  // ── Row 1 ──────────────────────────────────────────
+  { id: 'meeting1',  nome: 'Sala de Reunião 1', x: 0,    y: 0,   w: 426, h: 280 },
+  { id: 'meeting2',  nome: 'Sala de Reunião 2', x: 426,  y: 0,   w: 427, h: 280 },
+  { id: 'executive', nome: 'Diretoria',          x: 853,  y: 0,   w: 427, h: 280 },
+  // ── Row 2 ──────────────────────────────────────────
+  { id: 'marketing', nome: 'Marketing',          x: 0,    y: 280, w: 256, h: 280 },
+  { id: 'copy',      nome: 'Copy',               x: 256,  y: 280, w: 256, h: 280 },
+  { id: 'research',  nome: 'Pesquisa',           x: 512,  y: 280, w: 256, h: 280 },
+  { id: 'growth',    nome: 'Growth',             x: 768,  y: 280, w: 256, h: 280 },
+  { id: 'finance',   nome: 'Financeiro',         x: 1024, y: 280, w: 256, h: 280 },
+  // ── Row 3 ──────────────────────────────────────────
+  { id: 'kitchen',   nome: 'Copa',               x: 0,    y: 560, w: 320, h: 240 },
+  { id: 'lounge',    nome: 'Área de Descanso',  x: 320,  y: 560, w: 320, h: 240 },
+  { id: 'reception', nome: 'Recepção',           x: 640,  y: 560, w: 640, h: 240 },
 ];
 
 export function detectarSala(x: number, y: number, salas: ZonaSala[] = SALAS): string {

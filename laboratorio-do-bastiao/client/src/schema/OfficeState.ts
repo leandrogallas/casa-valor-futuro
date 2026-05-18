@@ -3,8 +3,8 @@ import { Schema, MapSchema, type } from '@colyseus/schema';
 export class JogadorState extends Schema {
   @type('string') id: string = '';
   @type('string') nome: string = '';
-  @type('number') x: number = 640;
-  @type('number') y: number = 1400;
+  @type('number') x: number = 960;
+  @type('number') y: number = 680;
   @type('string') salaAtualId: string = 'reception';
   @type('string') direcao: string = 'down';
 }

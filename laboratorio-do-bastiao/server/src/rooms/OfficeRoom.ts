@@ -2,7 +2,7 @@ import { Room, Client } from 'colyseus';
 import { OfficeState, JogadorState } from './schema/OfficeState.js';
 import { escreverAuditEvent } from '../db/auditLog.js';
 
-const BOUNDS = { x: [0, 1280], y: [0, 1760] } as const;
+const BOUNDS = { x: [0, 1280], y: [0, 800] } as const;
 const DIRS_VALIDAS = new Set(['up', 'down', 'left', 'right']);
 
 interface MoveMsg {
@@ -53,8 +53,8 @@ export class OfficeRoom extends Room<OfficeState> {
     const jogador = new JogadorState();
     jogador.id = opcoes.userId ?? client.sessionId;
     jogador.nome = opcoes.nome ?? 'Anônimo';
-    jogador.x = 640;
-    jogador.y = 1400;
+    jogador.x = 960;
+    jogador.y = 680;
     jogador.salaAtualId = 'reception';
     jogador.direcao = 'down';
     this.state.jogadores.set(client.sessionId, jogador);

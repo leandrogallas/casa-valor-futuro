@@ -27,7 +27,6 @@ export class PreloadScene extends Phaser.Scene {
     };
     this.load.on('progress', onProgress);
 
-    this.load.image('map-bg', 'assets/maps/office.png');
     this.load.spritesheet('avatar-human', 'assets/sprites/avatar-human.png', {
       frameWidth: FRAME_W, frameHeight: FRAME_H,
     });
