@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Laboratorio do Bastiao",
+  "version": "0.1.0",
+  "identifier": "com.leandrogallas.bastiao",
+  "build": {
+    "beforeBuildCommand": "pnpm --filter @bastiao/client build",
+    "beforeDevCommand": "pnpm --filter @bastiao/client dev",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../client/dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Laboratório do Bastião",
+        "width": 1280,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all"
+  }
+}
