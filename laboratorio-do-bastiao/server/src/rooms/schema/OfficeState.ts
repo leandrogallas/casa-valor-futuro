@@ -1,20 +1,14 @@
-// Schema de estado sincronizado entre servidor e clientes para uma sala office.
-// Stub agnóstico ao @colyseus/schema enquanto a dependência não está instalada.
+import { Schema, MapSchema, type } from '@colyseus/schema';
 
-export interface JogadorState {
-  id: string;
-  nome: string;
-  x: number;
-  y: number;
-  salaAtualId: string;
+export class JogadorState extends Schema {
+  @type('string') id: string = '';
+  @type('string') nome: string = '';
+  @type('number') x: number = 100;
+  @type('number') y: number = 100;
+  @type('string') salaAtualId: string = 'recepcao';
 }
 
-export interface OfficeStateShape {
-  predioId: string;
-  jogadores: Map<string, JogadorState>;
-}
-
-export class OfficeState implements OfficeStateShape {
-  predioId = '';
-  jogadores: Map<string, JogadorState> = new Map();
+export class OfficeState extends Schema {
+  @type('string') predioId: string = 'predio-principal';
+  @type({ map: JogadorState }) jogadores = new MapSchema<JogadorState>();
 }

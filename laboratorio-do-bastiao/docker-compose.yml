@@ -1,0 +1,22 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "2567:2567"
+    environment:
+      PORT: "2567"
+      SQLITE_PATH: "/app/data/bastiao.db"
+      JWT_SECRET: "${JWT_SECRET:-dev-secret-change-in-production}"
+    volumes:
+      - bastiao_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:2567/health').then(r=>process.exit(r.ok?0:1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  bastiao_data:
