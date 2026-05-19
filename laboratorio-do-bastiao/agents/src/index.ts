@@ -28,6 +28,9 @@ async function main(): Promise<void> {
     const encerrar = () => { orchestrator.encerrar(); process.exit(0); };
     process.on('SIGTERM', encerrar);
     process.on('SIGINT', encerrar);
+
+    // Mantém o processo vivo enquanto o poll timer existir
+    await new Promise<void>(() => { /* resolvido apenas por SIGTERM/SIGINT */ });
     return;
   }
 

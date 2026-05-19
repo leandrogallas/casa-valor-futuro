@@ -24,20 +24,36 @@ interface Rotina {
   ativa: number;
 }
 
+const POLL_INTERVAL_MS = 30_000;
+
 export class HermesOrchestrator {
   private workers = new Map<string, AgenteWorker>();
   private schedulers = new Map<string, AgentScheduler>();
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private serverUrl: string) {}
 
   async iniciar(): Promise<void> {
     console.log('[hermes] iniciando orchestrator...');
+    await this.sincronizarAgentes();
 
+    // Polling: detecta novos agentes adicionados após o start
+    this.pollTimer = setInterval(() => {
+      this.sincronizarAgentes().catch((err) =>
+        console.warn('[hermes] erro no poll:', String(err)),
+      );
+    }, POLL_INTERVAL_MS);
+
+    console.log(`[hermes] polling a cada ${POLL_INTERVAL_MS / 1000}s para novos agentes`);
+  }
+
+  private async sincronizarAgentes(): Promise<void> {
     const agentes = await this.fetchAgentes();
-    console.log(`[hermes] ${agentes.length} agentes encontrados`);
-
-    await Promise.all(agentes.map((a) => this.iniciarAgente(a)));
-    console.log('[hermes] todos os agentes ativos');
+    const novos = agentes.filter((a) => !this.workers.has(a.id));
+    if (novos.length > 0) {
+      console.log(`[hermes] ${novos.length} novo(s) agente(s) encontrado(s)`);
+      await Promise.all(novos.map((a) => this.iniciarAgente(a)));
+    }
   }
 
   private async iniciarAgente(agente: ConfiguracaoAgente): Promise<void> {
@@ -142,6 +158,7 @@ export class HermesOrchestrator {
 
   encerrar(): void {
     console.log('[hermes] encerrando...');
+    if (this.pollTimer) { clearInterval(this.pollTimer); this.pollTimer = null; }
     for (const scheduler of this.schedulers.values()) scheduler.parar();
     for (const worker of this.workers.values()) worker.encerrar();
     this.schedulers.clear();
